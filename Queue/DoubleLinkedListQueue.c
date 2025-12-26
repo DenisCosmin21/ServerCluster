@@ -21,6 +21,12 @@ struct queue {
 
 static struct node *create_node(char *data) {
     node_t node = malloc(sizeof(struct node));
+
+    if(node == NULL) {
+        perror("Eroare alocare");
+        exit(-1);
+    }
+
     node->data = data;
     node->next = NULL;
 }
