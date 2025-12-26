@@ -12,6 +12,10 @@ link_directories("${MPI_LIB_PATH}")
 
 add_executable(ServerCluster main.c
         Queue/DoubleLinkedListQueue.c
-        Queue/DoubleLinkedListQueue.h)
+        Queue/DoubleLinkedListQueue.h
+        Dispatcher/JobDispatcher.c
+        Dispatcher/JobDispatcher.h
+        Utilities/Utilities.c
+        Utilities/Utilities.h)
 
 target_link_libraries(ServerCluster msmpi)
