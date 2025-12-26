@@ -12,7 +12,8 @@ void *allocate(void *buffer, size_t elem_size, size_t *old_size) {
     void *new_buffer = realloc(buffer, *old_size * elem_size);
 
     if(new_buffer == NULL) {
-        perror("realloc");
+        perror("Not enough memory");
+        exit(-1);
     }
 
     buffer = new_buffer;
