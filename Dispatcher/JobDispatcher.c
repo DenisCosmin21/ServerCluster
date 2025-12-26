@@ -56,7 +56,7 @@ static void handleCommand(char *command) {
     enqueue(jobQueue, command);
 }
 
-static void *runDispatcher(void *dummy) {
+static void *readCommands(void *dummy) {
     FILE *commandFile = fopen("../Resources/commands.txt", "r");
 
     if (commandFile == NULL) {
@@ -87,11 +87,11 @@ static void *dispatchCommands(void *dummy) {
     return NULL;
 }
 
-void initializeDispatcher(void) { //used to initialize the queue for the dispatcher and start the threads
+void runDispatcher(void) { //used to initialize the queue for the dispatcher and start the threads and wait for them
     queue_init(&jobQueue);
     pthread_t readThread;
     pthread_t dispatchThread;
-    pthread_create(&readThread, NULL, runDispatcher, NULL);
+    pthread_create(&readThread, NULL, readCommands, NULL);
     pthread_create(&dispatchThread, NULL, dispatchCommands, NULL);
     pthread_join(readThread, NULL);
     pthread_join(dispatchThread, NULL);

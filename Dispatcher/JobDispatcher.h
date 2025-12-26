@@ -5,5 +5,5 @@
 #ifndef JOBDISPATCHER_H
 #define JOBDISPATCHER_H
 
-void initializeDispatcher(void);
+void runDispatcher(void);
 #endif //JOBDISPATCHER_H
