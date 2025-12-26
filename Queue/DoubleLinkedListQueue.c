@@ -78,11 +78,11 @@ int is_empty(queue_t queue) {
     return queue->size == 0;
 }
 
-void print_queue(queue_t queue) {
+void print_queue(queue_t queue, void (*print)(void *)) {
     node_t front_node = queue->front;
 
     while(front_node != NULL) {
-        printf("%s ", front_node->data);
+        print(front_node->data);
         front_node = front_node->next;
     }
 

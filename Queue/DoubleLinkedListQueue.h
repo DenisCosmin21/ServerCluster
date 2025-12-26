@@ -15,7 +15,7 @@ void enqueue(queue_t queue, void *data);
 
 void *dequeue(queue_t queue);
 
-void print_queue(queue_t queue);
+void print_queue(queue_t queue, void (*print)(void *));
 
 int is_empty(queue_t queue);
 #endif //DOUBLELINKEDLISTQUEUE_H
