@@ -13,6 +13,8 @@
 #include <pthread.h>
 
 static queue_t jobQueue;
+static queue_t responseQueue;
+static queue_t availableWorkers;
 static char finishedReading = 0;
 
 static void printInt(void *data) {
