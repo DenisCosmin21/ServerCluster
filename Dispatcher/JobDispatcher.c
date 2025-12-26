@@ -10,10 +10,12 @@
 #include <Windows.h>
 #include "../Utilities/Utilities.h"
 #include "../Queue/DoubleLinkedListQueue.h"
+#include <pthread.h>
 
-queue_t jobQueue;
+static queue_t jobQueue;
+static char finishedReading = 0;
 
-char *readCommand(FILE* file) {
+static char *readCommand(FILE* file) {
     if(feof(file))
         return NULL;
 
@@ -42,7 +44,7 @@ char *readCommand(FILE* file) {
     return line;
 }
 
-void handleCommand(char *command) {
+static void handleCommand(char *command) {
     if(strstr(command, "WAIT")) {
         strtok(command, " ");
         char *timeToSleep = strtok(NULL, " ");
@@ -54,9 +56,7 @@ void handleCommand(char *command) {
     enqueue(jobQueue, command);
 }
 
-void *runDispatcher(void *) {
-    queue_init(&jobQueue);
-
+static void *runDispatcher(void *dummy) {
     FILE *commandFile = fopen("../Resources/commands.txt", "r");
 
     if (commandFile == NULL) {
@@ -70,5 +70,29 @@ void *runDispatcher(void *) {
         handleCommand(line);
     }
 
+    finishedReading = 1;
+
+    fclose(commandFile);
+
     return NULL;
+}
+
+static void *dispatchCommands(void *dummy) {
+    while(finishedReading == 0 || !is_empty(jobQueue)) {
+        char *command = dequeue(jobQueue);
+        if(command != NULL)
+            printf("%s\n", command);
+    }
+
+    return NULL;
+}
+
+void initializeDispatcher(void) { //used to initialize the queue for the dispatcher and start the threads
+    queue_init(&jobQueue);
+    pthread_t readThread;
+    pthread_t dispatchThread;
+    pthread_create(&readThread, NULL, runDispatcher, NULL);
+    pthread_create(&dispatchThread, NULL, dispatchCommands, NULL);
+    pthread_join(readThread, NULL);
+    pthread_join(dispatchThread, NULL);
 }
