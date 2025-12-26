@@ -108,6 +108,29 @@ static void *dispatchCommands(void *dummy) {
     return NULL;
 }
 
+
+static void initAvailableWorkers(void) {
+    queue_init(&availableWorkers);
+    totalWorkers = 7;
+
+    //MPI_Comm_size(MPI_COMM_WORLD, &totalWorkers);
+     totalWorkers--;
+
+    workers = malloc(totalWorkers * sizeof(int));
+
+    if(workers == NULL) {
+        perror("Eroare alocare");
+        exit(-1);
+    }
+
+    for(int i = 0; i < totalWorkers; i++) {
+        workers[i] = i + 1;
+        enqueue(availableWorkers, &workers[i]);
+    }
+
+    print_queue(availableWorkers, printInt);
+}
+
 void runDispatcher(void) { //used to initialize the queue for the dispatcher and start the threads and wait for them
     queue_init(&jobQueue);
     pthread_t readThread;
