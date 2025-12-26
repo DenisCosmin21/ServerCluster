@@ -10,6 +10,8 @@ include_directories("${MPI_INCLUDE_PATH}")
 
 link_directories("${MPI_LIB_PATH}")
 
-add_executable(ServerCluster main.c)
+add_executable(ServerCluster main.c
+        Queue/DoubleLinkedListQueue.c
+        Queue/DoubleLinkedListQueue.h)
 
 target_link_libraries(ServerCluster msmpi)
