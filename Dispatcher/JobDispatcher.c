@@ -91,9 +91,18 @@ static void *readCommands(void *dummy) {
 
 static void *dispatchCommands(void *dummy) {
     while(finishedReading == 0 || !is_empty(jobQueue)) {
+        int *worker = peek(availableWorkers);
+        //Wait until a worker is available
+        if(worker == NULL)
+            continue;
+
         char *command = dequeue(jobQueue);
-        if(command != NULL)
+
+        if(command != NULL){
+            worker = dequeue(availableWorkers);
+            printf("%d\n", *worker);
             printf("%s\n", command);
+        }
     }
 
     return NULL;
