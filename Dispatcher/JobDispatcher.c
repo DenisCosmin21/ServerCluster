@@ -108,6 +108,58 @@ static void *dispatchCommands(void *dummy) {
     return NULL;
 }
 
+static void *saveResponses(void *dummy) {
+    FILE *responseFile = fopen("../Resources/responses.txt", "w");
+
+    if(responseFile == NULL) {
+        perror("Error opening response file\n");
+        exit(-1);
+    }
+
+/*We can have response if we haven't finished reading, or if we haven't finished dispathcing all jobs,
+ or if we haven't printed all responses*/
+
+    while(finishedReading == 0 || !is_empty(responseQueue) || !is_empty(jobQueue) || get_size(availableWorkers) != totalWorkers) {
+        char *response = dequeue(responseQueue);
+        if(response != NULL)
+            fprintf(responseFile, "%s\n", response);
+    }
+
+    fclose(responseFile);
+
+    return NULL;
+}
+
+static void *getResponses(void *dummy) {
+    char *response = NULL;
+    int responseSize = 0;
+    int rank = 0;
+
+    MPI_Status status;
+
+    /*We can have response if we haven't finished reading, or if we haven't finished dispathcing all jobs*/
+
+    while(finishedReading == 0 || !is_empty(jobQueue)) {
+        MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+
+        MPI_Get_count(&status, MPI_CHAR, &responseSize);
+
+        rank = status.MPI_SOURCE;
+
+        response = malloc(responseSize * sizeof(char));
+
+        if(response == NULL) {
+            perror("Eroare alocare");
+            exit(-1);
+        }
+
+        enqueue(responseQueue, response);
+
+        enqueue(availableWorkers, &workers[rank - 1]);
+    }
+
+    return NULL;
+}
 
 static void initAvailableWorkers(void) {
     queue_init(&availableWorkers);
@@ -133,6 +185,8 @@ static void initAvailableWorkers(void) {
 
 void runDispatcher(void) { //used to initialize the queue for the dispatcher and start the threads and wait for them
     queue_init(&jobQueue);
+    queue_init(&responseQueue);
+    initAvailableWorkers();
     pthread_t readThread;
     pthread_t dispatchThread;
     pthread_create(&readThread, NULL, readCommands, NULL);
