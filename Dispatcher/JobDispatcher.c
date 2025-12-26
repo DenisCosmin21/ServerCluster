@@ -15,6 +15,16 @@
 static queue_t jobQueue;
 static char finishedReading = 0;
 
+static void printInt(void *data) {
+    int *i = (int *)data;
+    printf("%d\n", *i);
+}
+
+static void printString(void *data) {
+    char *str = (char *)data;
+    printf("%s\n", str);
+}
+
 static char *readCommand(FILE* file) {
     if(feof(file))
         return NULL;
