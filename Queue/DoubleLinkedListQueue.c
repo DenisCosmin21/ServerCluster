@@ -10,16 +10,16 @@
 
 struct node {
     void *data;
-    struct node *next;
+    node_t next;
 };
 
 struct queue {
-    struct node *front;
-    struct node *back;
+    node_t front;
+    node_t back;
     size_t size;
 };
 
-static struct node *create_node(char *data) {
+static struct node *create_node(void *data) {
     node_t node = malloc(sizeof(struct node));
 
     if(node == NULL) {
@@ -29,6 +29,8 @@ static struct node *create_node(char *data) {
 
     node->data = data;
     node->next = NULL;
+
+    return node;
 }
 
 void queue_init(queue_t *queue) {
@@ -65,6 +67,9 @@ void *dequeue(queue_t queue) {
 
     queue->front = front_node->next;
 
+    if(queue->front == NULL)
+        queue->back = NULL;
+
     void *data = front_node->data;
 
     free(front_node);
@@ -74,11 +79,22 @@ void *dequeue(queue_t queue) {
     return data;
 }
 
-int is_empty(queue_t queue) {
+int is_empty(const struct queue* queue) {
     return queue->size == 0;
 }
 
-void print_queue(queue_t queue, void (*print)(void *)) {
+int get_size(const struct queue* queue) {
+    return queue->size;
+}
+
+void *peek(const struct queue* queue) {
+    if(queue->front == NULL)
+        return NULL;
+
+    return queue->front->data;
+}
+
+void print_queue(const struct queue* queue, void (*print)(void *)) {
     node_t front_node = queue->front;
 
     while(front_node != NULL) {

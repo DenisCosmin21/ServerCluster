@@ -15,7 +15,11 @@ void enqueue(queue_t queue, void *data);
 
 void *dequeue(queue_t queue);
 
-void print_queue(queue_t queue, void (*print)(void *));
+void *peek(const struct queue* queue);
 
-int is_empty(queue_t queue);
+void print_queue(const struct queue* queue, void (*print)(void *));
+
+int get_size(const struct queue* queuee);
+
+int is_empty(const struct queue* queue);
 #endif //DOUBLELINKEDLISTQUEUE_H
