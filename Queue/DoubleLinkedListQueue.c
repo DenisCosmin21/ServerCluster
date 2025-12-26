@@ -68,6 +68,10 @@ char *dequeue(queue_t queue) {
     return data;
 }
 
+int is_empty(queue_t queue) {
+    return queue->size == 0;
+}
+
 void print_queue(queue_t queue) {
     node_t front_node = queue->front;
 
