@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 struct node {
-    char *data;
+    void *data;
     struct node *next;
 };
 
@@ -35,7 +35,7 @@ void queue_init(queue_t *queue) {
     (*queue)->size = 0;
 }
 
-void enqueue(queue_t queue, char *data) {
+void enqueue(queue_t queue, void *data) {
     node_t new_node = create_node(data);
 
     if(queue->front == NULL)
@@ -51,7 +51,7 @@ void enqueue(queue_t queue, char *data) {
     queue->size++;
 }
 
-char *dequeue(queue_t queue) {
+void *dequeue(queue_t queue) {
     if(queue->front == NULL)
         return NULL;
 
@@ -59,7 +59,7 @@ char *dequeue(queue_t queue) {
 
     queue->front = front_node->next;
 
-    char *data = front_node->data;
+    void *data = front_node->data;
 
     free(front_node);
 
