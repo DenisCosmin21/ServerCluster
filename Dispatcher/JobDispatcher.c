@@ -72,8 +72,8 @@ static void *readCommands(void *dummy) {
     FILE *commandFile = fopen("../Resources/commands.txt", "r");
 
     if (commandFile == NULL) {
-        printf("Error opening command file\n");
-        return NULL;
+        perror("Error opening command file\n");
+        exit(-1);
     }
 
     char *line = NULL;
