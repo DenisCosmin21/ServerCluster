@@ -135,15 +135,14 @@ static DWORD WINAPI getResponses(LPVOID lpParam) {
     char *response = NULL;
     int responseSize = 0;
     int rank = 0;
-
     MPI_Status status;
-
-    /*We can have response if we haven't finished reading, or if we haven't finished dispathcing all jobs*/
 
     while(finishedReading == 0 || !is_empty(jobQueue)) {
         MPI_Probe(MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
 
         MPI_Get_count(&status, MPI_CHAR, &responseSize);
+
+        responseSize = responseSize + 1;
 
         rank = status.MPI_SOURCE;
 
@@ -172,6 +171,32 @@ static DWORD WINAPI getResponses(LPVOID lpParam) {
 
         LeaveCriticalSection(&workerAvailableMutex);
     }
+    return 0;
+}
+
+static DWORD WINAPI saveResponses(LPVOID lpParam) {
+    FILE *responseFile = fopen("C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\resources.txt", "w");
+
+    if(responseFile == NULL) {
+        perror("Error opening response file\n");
+        exit(-1);
+    }
+
+    while(finishedReading == 0 || !is_empty(responseQueue) || !is_empty(jobQueue) || get_size(availableWorkers) != totalWorkers - 1) {
+        //Wait for a response to exist to not poll
+        EnterCriticalSection(&responseAvailableMutex);
+
+        char *response = dequeue(responseQueue);
+
+        while(response == NULL) {
+            SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
+            response = dequeue(responseQueue);
+        }
+        LeaveCriticalSection(&responseAvailableMutex);
+        fprintf(responseFile, "%s\n", response);
+        fflush(responseFile);
+    }
+    fclose(responseFile);
     return 0;
 }
 
