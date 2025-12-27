@@ -3,11 +3,10 @@
 //
 
 #include "JobDispatcher.h"
-#include <pthread_time.h>
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <Windows.h>
 #include "../Utilities/Utilities.h"
 #include "../Queue/DoubleLinkedListQueue.h"
 #include <Windows.h> // Essential for Windows threads
@@ -217,7 +216,17 @@ static void initAvailableWorkers(void) {
     }
 }
 
-void runDispatcher(void) { //used to initialize the queue for the dispatcher and start the threads and wait for them
+static void finishWorkers(void) {
+    char test = 0;
+
+    for(int i = 0; i < totalWorkers - 1; i++) {
+        printf("Finishing worker %d\n", workers[i]);
+        fflush(stdout);
+        MPI_Send(&test, 1, MPI_CHAR, workers[i], STOP_WORKING, MPI_COMM_WORLD);
+    }
+}
+
+void runDispatcher(void) {
     queue_init(&jobQueue);
     queue_init(&responseQueue);
     initAvailableWorkers();
