@@ -1,45 +1,33 @@
 #include <stdio.h>
 #include <mpi.h>
-#include "Queue/DoubleLinkedListQueue.h"
+#include <stdlib.h>
 
-queue_t queue;
+#include "Dispatcher/JobDispatcher.h"
+#include "Worker/Worker.h"
 
 int main(void) {
-    queue_init(&queue);
+    int rank = 0;
+    int provided = 0;
+    int version = 0;
+    int subversion = 0;
 
-    char one[100] = "Test";
+    MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &provided);
 
-    char two[100] = "Test2";
+    if (provided < MPI_THREAD_MULTIPLE) {
+        // Note: Some versions of MS-MPI only support up to MPI_THREAD_SERIALIZED
+        exit(-1);
+    }
 
-    char three[100] = "Test3";
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    enqueue(queue, one);
+    if(rank == 0)
+        runDispatcher();
+    else
+        runWorker();
 
-    print_queue(queue);
+    printf("Finished program\n");
+    fflush(stdout);
+    MPI_Finalize();
 
-    enqueue(queue, two);
-
-    print_queue(queue);
-
-    enqueue(queue, three);
-
-    print_queue(queue);
-
-    char *result = dequeue(queue);
-
-    print_queue(queue);
-
-    printf("%s\n", result);
-
-    result = dequeue(queue);
-
-    print_queue(queue);
-
-    printf("%s\n", result);
-
-    result = dequeue(queue);
-
-    print_queue(queue);
-
-    printf("%s\n", result);
+    return 0;
 }

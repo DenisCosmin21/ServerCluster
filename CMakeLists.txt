@@ -6,16 +6,28 @@ set(CMAKE_C_STANDARD 11)
 set(MPI_INCLUDE_PATH "C:/Program Files (x86)/Microsoft SDKs/MPI/Include")
 set(MPI_LIB_PATH     "C:/Program Files (x86)/Microsoft SDKs/MPI/Lib/x64")
 
-include_directories("${MPI_INCLUDE_PATH}")
-
-link_directories("${MPI_LIB_PATH}")
+find_package(Threads REQUIRED)
 
 add_executable(ServerCluster main.c
         Queue/DoubleLinkedListQueue.c
-        Queue/DoubleLinkedListQueue.h
         Dispatcher/JobDispatcher.c
-        Dispatcher/JobDispatcher.h
         Utilities/Utilities.c
-        Utilities/Utilities.h)
+        Worker/Worker.c)
 
-target_link_libraries(ServerCluster msmpi)
+target_include_directories(ServerCluster PRIVATE
+        ${MPI_INCLUDE_PATH}
+        Queue
+        Dispatcher
+        Utilities
+        Worker
+)
+
+target_link_directories(ServerCluster PRIVATE
+        ${MPI_LIB_PATH}
+)
+
+target_link_libraries(
+        ServerCluster PRIVATE
+        msmpi
+        Threads::Threads
+    )
