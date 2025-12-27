@@ -9,7 +9,9 @@
 #include <string.h>
 #include "../Utilities/Utilities.h"
 #include "../Queue/DoubleLinkedListQueue.h"
-#include <Windows.h> // Essential for Windows threads
+#include <Windows.h>
+#include "../Jobs/Job.h"
+#include "../Jobs/JobReader.h"
 
 static int *workers = NULL;
 static int totalWorkers = 0;
@@ -26,55 +28,14 @@ static CRITICAL_SECTION commandAvailableMutex;
 static CRITICAL_SECTION workerAvailableMutex;
 static CRITICAL_SECTION responseAvailableMutex;
 
-static void printInt(void *data) {
-    int *i = (int *)data;
-    printf("%d ", *i);
-}
-
-static void printString(void *data) {
-    char *str = (char *)data;
-    printf("%s\n", str);
-}
-
-static char *readCommand(FILE* file) {
-    if(feof(file))
-        return NULL;
-
-    char *line = malloc(10 * sizeof(char)); //Use a allocation strategy for each line, so that we won't allocate too much space
-
-    size_t max_length = 10;
-
-    size_t current_length = 0;
-
-    if(line == NULL) {
-        perror("Eroare alocare");
-        exit(-1);
-    }
-
-    line[current_length++] = fgetc(file);
-
-    while(line[current_length - 1] != '\n' && line[current_length - 1] != EOF) {
-        if(current_length >= max_length)
-            line = allocate(line, sizeof(char), &max_length);
-
-        line[current_length++] = fgetc(file);
-    }
-
-    line[current_length - 1] = '\0';
-
-    return line;
-}
-
-static void handleCommand(char *command) {
-    if(strstr(command, "WAIT")) {
-        strtok(command, " ");
-        char *timeToSleep = strtok(NULL, " ");
-        Sleep(strtol(timeToSleep, NULL, 10) * 1000);
+static void handleCommand(const job_t job) {
+    if(job->jobType == WAIT) {
+        Sleep(strtol(job->params, NULL, 10) * 1000);
         return;
     }
 
     EnterCriticalSection(&commandAvailableMutex);
-    enqueue(jobQueue, command);
+    enqueue(jobQueue, job);
     WakeConditionVariable(&commandAvailableCondition);
     LeaveCriticalSection(&commandAvailableMutex);
 }
@@ -87,10 +48,10 @@ static DWORD WINAPI readCommands(LPVOID lpParam) {
         exit(-1);
     }
 
-    char *line = NULL;
+    job_t job = NULL;
 
-    while((line = readCommand(commandFile)) != NULL) {
-        handleCommand(line);
+    while((job = readCommand(commandFile)) != NULL) {
+        handleCommand(job);
     }
 
     finishedReading = 1;
@@ -115,16 +76,17 @@ static DWORD WINAPI dispatchCommands(LPVOID lpParam) {
         //Wait untill a command is received
         EnterCriticalSection(&commandAvailableMutex);
 
-        char *command = dequeue(jobQueue);
+        job_t job = dequeue(jobQueue);
 
-        while(command == NULL) {
+        while(job == NULL) {
             SleepConditionVariableCS(&commandAvailableCondition, &commandAvailableMutex, INFINITE);
-            command = dequeue(jobQueue);
+            job = dequeue(jobQueue);
         }
         LeaveCriticalSection(&commandAvailableMutex);
 
-        MPI_Send(command, strlen(command) + 1, MPI_CHAR, *worker, WORK, MPI_COMM_WORLD);
-        free(command);
+        MPI_Send(job->params, strlen(job->params) + 1, MPI_CHAR, *worker, job->jobType, MPI_COMM_WORLD);
+        free(job->params);
+        free(job);
     }
 
     return 0;
