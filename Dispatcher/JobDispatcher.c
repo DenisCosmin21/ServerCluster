@@ -12,6 +12,8 @@
 #include "../Queue/DoubleLinkedListQueue.h"
 #include <pthread.h>
 
+static int *workers = NULL;
+static int totalWorkers = 0;
 static queue_t jobQueue;
 static queue_t responseQueue;
 static queue_t availableWorkers;
@@ -163,24 +165,19 @@ static void *getResponses(void *dummy) {
 
 static void initAvailableWorkers(void) {
     queue_init(&availableWorkers);
-    totalWorkers = 7;
 
-    //MPI_Comm_size(MPI_COMM_WORLD, &totalWorkers);
-     totalWorkers--;
+    MPI_Comm_size(MPI_COMM_WORLD, &totalWorkers);
 
     workers = malloc(totalWorkers * sizeof(int));
-
     if(workers == NULL) {
         perror("Eroare alocare");
         exit(-1);
     }
 
-    for(int i = 0; i < totalWorkers; i++) {
+    for(int i = 0; i < totalWorkers - 1; i++) {
         workers[i] = i + 1;
         enqueue(availableWorkers, &workers[i]);
     }
-
-    print_queue(availableWorkers, printInt);
 }
 
 void runDispatcher(void) { //used to initialize the queue for the dispatcher and start the threads and wait for them
