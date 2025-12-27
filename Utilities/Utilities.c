@@ -4,6 +4,7 @@
 
 #include "Utilities.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 void *allocate(void *buffer, size_t elem_size, size_t *old_size) {
@@ -19,4 +20,14 @@ void *allocate(void *buffer, size_t elem_size, size_t *old_size) {
     buffer = new_buffer;
 
     return buffer;
+}
+
+void printInt(void *data) {
+    int *i = (int *)data;
+    printf("%d ", *i);
+}
+
+void printString(void *data) {
+    char *str = (char *)data;
+    printf("%s\n", str);
 }
