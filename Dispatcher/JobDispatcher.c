@@ -19,9 +19,17 @@ static queue_t responseQueue;
 static queue_t availableWorkers;
 static char finishedReading = 0;
 
+static CONDITION_VARIABLE commandAvailableCondition;
+static CONDITION_VARIABLE workerAvailableCondition;
+static CONDITION_VARIABLE responseAvailableCondition;
+
+static CRITICAL_SECTION commandAvailableMutex;
+static CRITICAL_SECTION workerAvailableMutex;
+static CRITICAL_SECTION responseAvailableMutex;
+
 static void printInt(void *data) {
     int *i = (int *)data;
-    printf("%d\n", *i);
+    printf("%d ", *i);
 }
 
 static void printString(void *data) {
@@ -62,12 +70,14 @@ static void handleCommand(char *command) {
     if(strstr(command, "WAIT")) {
         strtok(command, " ");
         char *timeToSleep = strtok(NULL, " ");
-        printf("Waiting for %s seconds\n", timeToSleep);
         Sleep(strtol(timeToSleep, NULL, 10) * 1000);
         return;
     }
 
+    EnterCriticalSection(&commandAvailableMutex);
     enqueue(jobQueue, command);
+    WakeConditionVariable(&commandAvailableCondition);
+    LeaveCriticalSection(&commandAvailableMutex);
 }
 
 static DWORD WINAPI readCommands(LPVOID lpParam) {
@@ -91,18 +101,31 @@ static DWORD WINAPI readCommands(LPVOID lpParam) {
 
 static DWORD WINAPI dispatchCommands(LPVOID lpParam) {
     while(finishedReading == 0 || !is_empty(jobQueue)) {
-        int *worker = peek(availableWorkers);
-        //Wait until a worker is available
-        if(worker == NULL)
-            continue;
+        //Wait untill a worker is ready to work
+        EnterCriticalSection(&workerAvailableMutex);
+
+        int *worker = dequeue(availableWorkers);
+
+        while(worker == NULL) {
+            SleepConditionVariableCS(&workerAvailableCondition, &workerAvailableMutex, INFINITE);
+            worker = dequeue(availableWorkers);
+        }
+
+        LeaveCriticalSection(&workerAvailableMutex);
+
+        //Wait untill a command is received
+        EnterCriticalSection(&commandAvailableMutex);
 
         char *command = dequeue(jobQueue);
 
-        if(command != NULL){
-            worker = dequeue(availableWorkers);
-            printf("%d\n", *worker);
-            printf("%s\n", command);
+        while(command == NULL) {
+            SleepConditionVariableCS(&commandAvailableCondition, &commandAvailableMutex, INFINITE);
+            command = dequeue(jobQueue);
         }
+        LeaveCriticalSection(&commandAvailableMutex);
+
+        MPI_Send(command, strlen(command) + 1, MPI_CHAR, *worker, WORK, MPI_COMM_WORLD);
+        free(command);
     }
 
     return 0;
@@ -131,9 +154,23 @@ static DWORD WINAPI getResponses(LPVOID lpParam) {
             exit(-1);
         }
 
+        MPI_Recv(response, responseSize, MPI_CHAR, rank, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+        EnterCriticalSection(&responseAvailableMutex);
+
         enqueue(responseQueue, response);
 
+        WakeConditionVariable(&responseAvailableCondition);
+
+        LeaveCriticalSection(&responseAvailableMutex);
+
+        EnterCriticalSection(&workerAvailableMutex);
+
         enqueue(availableWorkers, &workers[rank - 1]);
+
+        WakeConditionVariable(&workerAvailableCondition);
+
+        LeaveCriticalSection(&workerAvailableMutex);
     }
     return 0;
 }
@@ -159,12 +196,15 @@ void runDispatcher(void) { //used to initialize the queue for the dispatcher and
     queue_init(&jobQueue);
     queue_init(&responseQueue);
     initAvailableWorkers();
-    pthread_t readThread;
-    pthread_t dispatchThread;
-    pthread_create(&readThread, NULL, readCommands, NULL);
-    pthread_create(&dispatchThread, NULL, dispatchCommands, NULL);
-    pthread_join(readThread, NULL);
-    pthread_join(dispatchThread, NULL);
+
+    //Initialize condition variables for different kind of events to not make 100% cpu usage by polling
+    InitializeConditionVariable(&commandAvailableCondition);
+    InitializeConditionVariable(&workerAvailableCondition);
+    InitializeConditionVariable(&responseAvailableCondition);
+
+    InitializeCriticalSection(&commandAvailableMutex);
+    InitializeCriticalSection(&workerAvailableMutex);
+    InitializeCriticalSection(&responseAvailableMutex);
 
     // Windows Handles for threads
     HANDLE threads[4];
@@ -191,4 +231,9 @@ void runDispatcher(void) { //used to initialize the queue for the dispatcher and
         CloseHandle(threads[i]);
     }
 
+    DeleteCriticalSection(&commandAvailableMutex);
+    DeleteCriticalSection(&workerAvailableMutex);
+    DeleteCriticalSection(&responseAvailableMutex);
+
+    finishWorkers();
 }
