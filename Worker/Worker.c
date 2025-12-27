@@ -8,16 +8,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../Jobs/Job.h"
 
-static void handleCommand(char *command) {
-    strtok(command, " ");
-
-    char *param = strtok(NULL, " ");
-    MPI_Send(param, strlen(param) + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+static void handleCommand(job_t job) {
+    char *param = job->params;
+    char result[100];
+    sprintf(result, "%d %s", job->jobType, param);
+    printf("%s\n", result);
+    fflush(stdout);
+    MPI_Send(result, strlen(result) + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
 }
 
 void runWorker() {
-    char *command;
     int size = 0;
 
     MPI_Status status;
@@ -34,17 +36,22 @@ void runWorker() {
 
         MPI_Get_count(&status, MPI_CHAR, &size);
 
-        command = malloc(size * sizeof(char));
+        char *params = malloc(size * sizeof(char));
 
-        if(command == NULL) {
+        if(params == NULL) {
             perror("Eroare alocare");
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
 
-        MPI_Recv(command, size + 1, MPI_CHAR, 0, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(params, size + 1, MPI_CHAR, 0, status.MPI_TAG, MPI_COMM_WORLD, &status);
 
-        handleCommand(command);
+        jobType_t jobType = status.MPI_TAG;
 
-        free(command);
+        job_t job = newJob(jobType, params);
+
+        handleCommand(job);
+
+        free(job->params);
+        free(job);
     }
 }
