@@ -10,7 +10,7 @@
 #include <Windows.h>
 #include "../Utilities/Utilities.h"
 #include "../Queue/DoubleLinkedListQueue.h"
-#include <pthread.h>
+#include <Windows.h> // Essential for Windows threads
 
 static int *workers = NULL;
 static int totalWorkers = 0;
@@ -70,8 +70,8 @@ static void handleCommand(char *command) {
     enqueue(jobQueue, command);
 }
 
-static void *readCommands(void *dummy) {
-    FILE *commandFile = fopen("../Resources/commands.txt", "r");
+static DWORD WINAPI readCommands(LPVOID lpParam) {
+    FILE *commandFile = fopen("C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\commands.txt", "r");
 
     if (commandFile == NULL) {
         perror("Error opening command file\n");
@@ -85,13 +85,11 @@ static void *readCommands(void *dummy) {
     }
 
     finishedReading = 1;
-
     fclose(commandFile);
-
-    return NULL;
+    return 0;
 }
 
-static void *dispatchCommands(void *dummy) {
+static DWORD WINAPI dispatchCommands(LPVOID lpParam) {
     while(finishedReading == 0 || !is_empty(jobQueue)) {
         int *worker = peek(availableWorkers);
         //Wait until a worker is available
@@ -107,32 +105,10 @@ static void *dispatchCommands(void *dummy) {
         }
     }
 
-    return NULL;
+    return 0;
 }
 
-static void *saveResponses(void *dummy) {
-    FILE *responseFile = fopen("../Resources/responses.txt", "w");
-
-    if(responseFile == NULL) {
-        perror("Error opening response file\n");
-        exit(-1);
-    }
-
-/*We can have response if we haven't finished reading, or if we haven't finished dispathcing all jobs,
- or if we haven't printed all responses*/
-
-    while(finishedReading == 0 || !is_empty(responseQueue) || !is_empty(jobQueue) || get_size(availableWorkers) != totalWorkers) {
-        char *response = dequeue(responseQueue);
-        if(response != NULL)
-            fprintf(responseFile, "%s\n", response);
-    }
-
-    fclose(responseFile);
-
-    return NULL;
-}
-
-static void *getResponses(void *dummy) {
+static DWORD WINAPI getResponses(LPVOID lpParam) {
     char *response = NULL;
     int responseSize = 0;
     int rank = 0;
@@ -159,8 +135,7 @@ static void *getResponses(void *dummy) {
 
         enqueue(availableWorkers, &workers[rank - 1]);
     }
-
-    return NULL;
+    return 0;
 }
 
 static void initAvailableWorkers(void) {
@@ -190,4 +165,30 @@ void runDispatcher(void) { //used to initialize the queue for the dispatcher and
     pthread_create(&dispatchThread, NULL, dispatchCommands, NULL);
     pthread_join(readThread, NULL);
     pthread_join(dispatchThread, NULL);
+
+    // Windows Handles for threads
+    HANDLE threads[4];
+
+    // CreateThreads
+    threads[0] = CreateThread(NULL, 0, readCommands, NULL, 0, NULL);
+    threads[1] = CreateThread(NULL, 0, dispatchCommands, NULL, 0, NULL);
+    threads[2] = CreateThread(NULL, 0, getResponses, NULL, 0, NULL);
+    threads[3] = CreateThread(NULL, 0, saveResponses, NULL, 0, NULL);
+
+    // Check for creation errors
+    for(int i = 0; i < 4; i++) {
+        if (threads[i] == NULL) {
+            fprintf(stderr, "Error creating thread %d\n", i);
+            exit(-1);
+        }
+    }
+
+    // Wait for all threads to finish (Equivalent to pthread_join)
+    WaitForMultipleObjects(4, threads, TRUE, INFINITE);
+
+    // Close handles to release resources
+    for(int i = 0; i < 4; i++) {
+        CloseHandle(threads[i]);
+    }
+
 }
