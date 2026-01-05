@@ -4,20 +4,23 @@
 #include "Job.h"
 
 #include <mpi.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-job_t newJob(jobType_t jobType, char *params) {
-    job_t newJob = malloc(sizeof(job_t));
+job_t newJob(jobType_t jobType, char *params, uint64_t jobId, uint64_t chunkId) {
+    job_t newJob = malloc(sizeof(struct job));
 
     if(newJob == NULL) {
         perror("eroare de alocare");
-        MPI_Abort(MPI_COMM_WORLD, 1);
+        //MPI_Abort(MPI_COMM_WORLD, 1);
         exit(-1);
     }
 
     newJob->jobType = jobType;
     newJob->params = params;
+    newJob->jobId = jobId;
+    newJob->chunkId = chunkId;
 
     return newJob;
 }
@@ -39,4 +42,17 @@ jobType_t getJobType(const char *command) {
         return MATRIXMULT;
 
     return WAIT;
+}
+
+void printJob(job_t job) {
+    if(job == NULL)
+        return;
+
+    printf("Job :\n");
+    printf("\tJob Type: %d\n", job->jobType);
+    printf("\tJob params: %s\n", job->params);
+    printf("\tJob ID: %llu\n", job->jobId);
+    printf("\tChunk ID: %llu\n", job->chunkId);
+
+    fflush(stdout);
 }

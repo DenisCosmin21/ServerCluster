@@ -6,8 +6,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <Utilities.h>
+#include "../Utilities/Utilities.h"
 #include "Job.h"
+
+static uint64_t currentJobId = 0;
 
 job_t readCommand(FILE* file) {
     if(feof(file))
@@ -48,5 +50,5 @@ job_t readCommand(FILE* file) {
 
     command[current_length - 1] = '\0';
 
-    return newJob(jobType, command);
+    return newJob(jobType, command, currentJobId++, 0);
 }
