@@ -87,12 +87,17 @@ static job_t waitForResponse(void) {
         SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
         response = dequeue(responseQueue);
 
+        while(response->chunkId != 0) {
+            SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
+            enqueue(responseQueue, response);
+            response = dequeue(responseQueue);
+        }
+    }
+
     return response;
 }
 
 DWORD WINAPI saveResponses(LPVOID lpParam) {
-    printf("Started saving responses\n");
-    fflush(stdout);
     FILE *responseFile = fopen("C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\resources.txt", "w");
 
     if(responseFile == NULL) {
@@ -116,7 +121,5 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
     }
 
     fclose(responseFile);
-    printf("Finished saving responses\n");
-    fflush(stdout);
     return 0;
 }
