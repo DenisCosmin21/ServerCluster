@@ -50,6 +50,5 @@ job_t readCommand(FILE* file) {
 
     command[current_length - 1] = '\0';
 
-    printf("%llu \n", currentJobId);
     return newJob(jobType, command, currentJobId++, 0);
 }

@@ -27,8 +27,6 @@ static void handleCommand(job_t job) {
 }
 
 DWORD WINAPI readCommands(LPVOID lpParam) {
-    printf("Started reading commands\n");
-    fflush(stdout);
     FILE *commandFile = fopen("C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\commands.txt", "r");
 
     if (commandFile == NULL) {
@@ -39,14 +37,10 @@ DWORD WINAPI readCommands(LPVOID lpParam) {
     job_t job = NULL;
 
     while((job = readCommand(commandFile)) != NULL) {
-        printf("Reading command\n");
-        fflush(stdout);
         handleCommand(job);
     }
 
     finishedReading = 1;
     fclose(commandFile);
-    printf("Finished reading commands\n");
-    fflush(stdout);
     return 0;
 }

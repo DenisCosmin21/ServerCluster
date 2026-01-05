@@ -10,7 +10,15 @@
 #include "../Globals/globals.h"
 #include <Windows.h>
 
-static void handleResponse(char *response, int worker) {
+static int availableJobs(void) {
+    return finishedReading == 0 || !is_empty(jobQueue);
+}
+
+static int availableResponses(void) {
+    return finishedReading == 0 || !is_empty(responseQueue) || !is_empty(jobQueue) || get_size(availableWorkers) != totalWorkers - 1;
+}
+
+static void handleResponse(job_t response, int worker) {
     EnterCriticalSection(&responseAvailableMutex);
 
     enqueue(responseQueue, response);
@@ -28,7 +36,24 @@ static void handleResponse(char *response, int worker) {
     LeaveCriticalSection(&workerAvailableMutex);
 }
 
+static job_t readResponseFromJob(MPI_Status *status) {
+    char *response = NULL;
+    int responseSize = 0;
+
+    MPI_Get_count(status, MPI_CHAR, &responseSize);
+
+    responseSize = responseSize + 1;
+
+    response = malloc(responseSize * sizeof(char));
+
+    if(response == NULL) {
+        perror("Eroare alocare");
+        exit(-1);
+    }
+
     job_t finishedJob = assignedJobs[status->MPI_SOURCE - 1];
+
+    MPI_Recv(response, responseSize, MPI_CHAR, status->MPI_SOURCE, status->MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
     assignedJobs[status->MPI_SOURCE - 1] = NULL;
     free(finishedJob->params);
@@ -37,15 +62,14 @@ static void handleResponse(char *response, int worker) {
 
     printf("Finish job by worker %d: \n", status->MPI_SOURCE);
     fflush(stdout);
-DWORD WINAPI getResponses(LPVOID lpParam) {
-    printf("Started getting responses\n");
-    fflush(stdout);
 
-    char *response = NULL;
-    int responseSize = 0;
+    return finishedJob;
+}
+
+DWORD WINAPI getResponses(LPVOID lpParam) {
     MPI_Status status;
 
-    while(finishedReading == 0 || !is_empty(jobQueue)) {
+    while(availableJobs()) {
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
         job_t response = readResponseFromJob(&status);
@@ -53,9 +77,17 @@ DWORD WINAPI getResponses(LPVOID lpParam) {
         handleResponse(response, status.MPI_SOURCE);
     }
 
-    printf("Finished getting responses\n");
-    fflush(stdout);
     return 0;
+}
+
+static job_t waitForResponse(void) {
+    job_t response = dequeue(responseQueue);
+
+    while(response == NULL) {
+        SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
+        response = dequeue(responseQueue);
+
+    return response;
 }
 
 DWORD WINAPI saveResponses(LPVOID lpParam) {
@@ -68,24 +100,21 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
         exit(-1);
     }
 
-    while(finishedReading == 0 || !is_empty(responseQueue) || !is_empty(jobQueue) || get_size(availableWorkers) != totalWorkers - 1) {
+    while(availableResponses()) {
         //Wait for a response to exist to not poll
         EnterCriticalSection(&responseAvailableMutex);
 
         job_t response = waitForResponse();
 
-        while(response == NULL) {
-            SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
-            response = dequeue(responseQueue);
-        }
         LeaveCriticalSection(&responseAvailableMutex);
-        fprintf(responseFile, "%s\n", response);
+
         fprintf(responseFile, "%s\n", response->params);
         fflush(responseFile);
 
         free(response->params);
         free(response);
     }
+
     fclose(responseFile);
     printf("Finished saving responses\n");
     fflush(stdout);

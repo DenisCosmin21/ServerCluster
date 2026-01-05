@@ -13,8 +13,6 @@
 #include "Commands/CommandReader.h"
 
 static void initAvailableWorkers(void) {
-    printf("Initializing workers\n");
-    fflush(stdout);
     queue_init(&availableWorkers);
 
     MPI_Comm_size(MPI_COMM_WORLD, &totalWorkers);
@@ -34,13 +32,9 @@ static void initAvailableWorkers(void) {
         assignedJobs[i] = NULL;
         enqueue(availableWorkers, &workers[i]);
     }
-    printf("Finished Initializing workers\n");
-    fflush(stdout);
 }
 
 void initializeDispatcher(HANDLE *threads) {
-    printf("Initializing Dispatcher\n");
-    fflush(stdout);
     queue_init(&jobQueue);
     queue_init(&responseQueue);
     initAvailableWorkers();
@@ -70,7 +64,4 @@ void initializeDispatcher(HANDLE *threads) {
             exit(-1);
         }
     }
-
-    printf("Finished initializing dispatcher\n");
-    fflush(stdout);
 }

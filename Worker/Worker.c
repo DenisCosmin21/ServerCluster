@@ -22,8 +22,7 @@ void runWorker() {
     int size = 0;
 
     MPI_Status status;
-    printf("Started worker\n");
-    fflush(stdout);
+
     while(1) {
         MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
@@ -50,7 +49,4 @@ void runWorker() {
 
         handleCommand(jobType, params);
     }
-
-    printf("End of worker\n");
-    fflush(stdout);
 }
