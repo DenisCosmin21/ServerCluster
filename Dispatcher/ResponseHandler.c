@@ -28,6 +28,15 @@ static void handleResponse(char *response, int worker) {
     LeaveCriticalSection(&workerAvailableMutex);
 }
 
+    job_t finishedJob = assignedJobs[status->MPI_SOURCE - 1];
+
+    assignedJobs[status->MPI_SOURCE - 1] = NULL;
+    free(finishedJob->params);
+
+    finishedJob->params = response;
+
+    printf("Finish job by worker %d: \n", status->MPI_SOURCE);
+    fflush(stdout);
 DWORD WINAPI getResponses(LPVOID lpParam) {
     printf("Started getting responses\n");
     fflush(stdout);
@@ -39,24 +48,7 @@ DWORD WINAPI getResponses(LPVOID lpParam) {
     while(finishedReading == 0 || !is_empty(jobQueue)) {
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-        MPI_Get_count(&status, MPI_CHAR, &responseSize);
-
-        responseSize = responseSize + 1;
-
-        response = malloc(responseSize * sizeof(char));
-
-        if(response == NULL) {
-            perror("Eroare alocare");
-            exit(-1);
-        }
-
-        job_t finishedJob = assignedJobs[status.MPI_SOURCE - 1];
-
-        MPI_Recv(response, responseSize, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-        printf("Finish job by worker %d: \n", status.MPI_SOURCE);
-        fflush(stdout);
-        printJob(finishedJob);
+        job_t response = readResponseFromJob(&status);
 
         handleResponse(response, status.MPI_SOURCE);
     }
@@ -80,7 +72,7 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
         //Wait for a response to exist to not poll
         EnterCriticalSection(&responseAvailableMutex);
 
-        char *response = dequeue(responseQueue);
+        job_t response = waitForResponse();
 
         while(response == NULL) {
             SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
@@ -88,7 +80,11 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
         }
         LeaveCriticalSection(&responseAvailableMutex);
         fprintf(responseFile, "%s\n", response);
+        fprintf(responseFile, "%s\n", response->params);
         fflush(responseFile);
+
+        free(response->params);
+        free(response);
     }
     fclose(responseFile);
     printf("Finished saving responses\n");
