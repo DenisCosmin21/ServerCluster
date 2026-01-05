@@ -7,9 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 job_t newJob(jobType_t jobType, char *params, uint64_t jobId, uint64_t chunkId) {
-    job_t newJob = malloc(sizeof(job_t));
+    job_t newJob = malloc(sizeof(struct job));
 
     if(newJob == NULL) {
         perror("eroare de alocare");

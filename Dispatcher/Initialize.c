@@ -22,7 +22,7 @@ static void initAvailableWorkers(void) {
     workers = malloc(totalWorkers * sizeof(int));
 
     //We use this to keep in mind wihch job was executed by which worker. The memory used is small.
-    //assignedJobs = malloc(totalWorkers * sizeof(job_t));
+    assignedJobs = malloc(totalWorkers * sizeof(job_t));
 
     if(workers == NULL) {
         perror("Eroare alocare");
@@ -31,7 +31,7 @@ static void initAvailableWorkers(void) {
 
     for(int i = 0; i < totalWorkers - 1; i++) {
         workers[i] = i + 1;
-        //assignedJobs[i] = NULL;
+        assignedJobs[i] = NULL;
         enqueue(availableWorkers, &workers[i]);
     }
     printf("Finished Initializing workers\n");

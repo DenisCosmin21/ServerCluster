@@ -50,11 +50,13 @@ DWORD WINAPI getResponses(LPVOID lpParam) {
             exit(-1);
         }
 
-        //job_t finishedJob = assignedJobs[status.MPI_SOURCE - 1];
+        job_t finishedJob = assignedJobs[status.MPI_SOURCE - 1];
 
         MPI_Recv(response, responseSize, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        //printJob(finishedJob);
+        printf("Finish job by worker %d: \n", status.MPI_SOURCE);
+        fflush(stdout);
+        printJob(finishedJob);
 
         handleResponse(response, status.MPI_SOURCE);
     }

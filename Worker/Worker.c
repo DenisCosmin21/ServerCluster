@@ -13,8 +13,6 @@
 static void handleCommand(jobType_t jobType, char *params) {
     char result[100];
     sprintf(result, "%d %s", jobType, params);
-    printf("%s\n", result);
-    fflush(stdout);
     MPI_Send(result, strlen(result) + 1, MPI_CHAR, 0, jobType, MPI_COMM_WORLD);
 
     free(params);

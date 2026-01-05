@@ -35,12 +35,11 @@ DWORD WINAPI dispatchCommands(LPVOID lpParam) {
         while(job == NULL) {
             SleepConditionVariableCS(&commandAvailableCondition, &commandAvailableMutex, INFINITE);
             job = dequeue(jobQueue);
+            assignedJobs[*worker - 1] = job;
         }
         LeaveCriticalSection(&commandAvailableMutex);
 
         MPI_Send(job->params, strlen(job->params) + 1, MPI_CHAR, *worker, job->jobType, MPI_COMM_WORLD);
-        free(job->params);
-        free(job);
     }
     printf("Finished dispatching commands\n");
     fflush(stdout);
