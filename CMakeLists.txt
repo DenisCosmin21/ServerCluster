@@ -12,14 +12,26 @@ add_executable(ServerCluster main.c
         Queue/DoubleLinkedListQueue.c
         Dispatcher/JobDispatcher.c
         Utilities/Utilities.c
-        Worker/Worker.c)
+        Worker/Worker.c
+        Jobs/JobReader.c
+        Jobs/Job.c
+        Dispatcher/ResponseHandler.c
+        Globals/globals.c
+        Dispatcher/Initialize.c
+        Dispatcher/CleanDispatcher.c
+        Dispatcher/Commands/CommandReader.c
+        Dispatcher/Commands/CommandDispatcher.c)
 
 target_include_directories(ServerCluster PRIVATE
         ${MPI_INCLUDE_PATH}
         Queue
         Dispatcher
+        Dispatcher/Commands
         Utilities
         Worker
+        Jobs
+        Globals
+        Config
 )
 
 target_link_directories(ServerCluster PRIVATE
