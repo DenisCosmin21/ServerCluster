@@ -41,6 +41,8 @@ job_t readCommand(FILE* file) {
 
     current_length = 0;
 
+    command[current_length++] = fgetc(file);
+
     while(command[current_length - 1] != '\n' && command[current_length - 1] != EOF) {
         if(current_length >= max_length)
             command = allocate(command, sizeof(char), &max_length);
