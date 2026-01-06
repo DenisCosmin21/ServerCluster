@@ -20,7 +20,11 @@ add_executable(ServerCluster main.c
         Dispatcher/Initialize.c
         Dispatcher/CleanDispatcher.c
         Dispatcher/Commands/CommandReader.c
-        Dispatcher/Commands/CommandDispatcher.c)
+        Dispatcher/Commands/CommandDispatcher.c
+        Jobs/Operations/Sleep/WaitJob.c
+        Jobs/Operations/Sleep/WaitJob.h
+        Jobs/Operations/Handler/ReadJobHandler.c
+        Jobs/Operations/Handler/ReadJobHandler.h)
 
 target_include_directories(ServerCluster PRIVATE
         ${MPI_INCLUDE_PATH}
@@ -30,6 +34,8 @@ target_include_directories(ServerCluster PRIVATE
         Utilities
         Worker
         Jobs
+        Jobs/Operations/Handler
+        Jobs/Operations/Sleep
         Globals
         Config
 )
