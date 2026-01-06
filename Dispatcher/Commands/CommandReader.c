@@ -3,7 +3,7 @@
 //
 
 #include "CommandReader.h"
-#include "../../Queue/DoubleLinkedListQueue.h"
+#include "../../Jobs/Operations/Handler/ReadJobHandler.h"
 #include "../../Globals/globals.h"
 #include "../../Jobs/Job.h"
 #include "../../Jobs/JobReader.h"
@@ -12,18 +12,6 @@
 
 static void printQueueJob(void *job) {
     printJob(job);
-}
-
-static void handleCommand(job_t job) {
-    if(job->jobType == WAIT) {
-        Sleep(strtol(job->params, NULL, 10) * 1000);
-        return;
-    }
-
-    EnterCriticalSection(&commandAvailableMutex);
-    enqueue(jobQueue, job);
-    WakeConditionVariable(&commandAvailableCondition);
-    LeaveCriticalSection(&commandAvailableMutex);
 }
 
 DWORD WINAPI readCommands(LPVOID lpParam) {
@@ -37,7 +25,7 @@ DWORD WINAPI readCommands(LPVOID lpParam) {
     job_t job = NULL;
 
     while((job = readCommand(commandFile)) != NULL) {
-        handleCommand(job);
+        readJobHandler(job);
     }
 
     finishedReading = 1;
