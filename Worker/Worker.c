@@ -43,7 +43,7 @@ void runWorker() {
             //MPI_Abort(MPI_COMM_WORLD, 1);
         }
 
-        MPI_Recv(params, size + 1, MPI_CHAR, 0, status.MPI_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(params, size, MPI_CHAR, 0, status.MPI_TAG, MPI_COMM_WORLD, &status);
 
         jobType_t jobType = status.MPI_TAG;
 
