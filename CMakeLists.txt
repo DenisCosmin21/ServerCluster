@@ -5,10 +5,13 @@ set(CMAKE_C_STANDARD 11)
 
 set(MPI_INCLUDE_PATH "C:/Program Files (x86)/Microsoft SDKs/MPI/Include")
 set(MPI_LIB_PATH     "C:/Program Files (x86)/Microsoft SDKs/MPI/Lib/x64")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
 
 find_package(Threads REQUIRED)
+find_package(OpenMP REQUIRED)
 
 add_executable(ServerCluster main.c
+        Config/config.h
         Queue/DoubleLinkedListQueue.c
         Dispatcher/JobDispatcher.c
         Utilities/Utilities.c
@@ -22,9 +25,12 @@ add_executable(ServerCluster main.c
         Dispatcher/Commands/CommandReader.c
         Dispatcher/Commands/CommandDispatcher.c
         Jobs/Operations/Sleep/WaitJob.c
-        Jobs/Operations/Sleep/WaitJob.h
         Jobs/Operations/Handler/ReadJobHandler.c
-        Jobs/Operations/Handler/ReadJobHandler.h)
+        Jobs/Operations/Primes/Primes.c
+        Jobs/Operations/PrimeDivizors/PrimeDivisors.c
+        Jobs/Operations/Handler/ExecuteJobHandler.c
+        Jobs/Operations/Handler/ExecuteJobHandler.h
+        )
 
 target_include_directories(ServerCluster PRIVATE
         ${MPI_INCLUDE_PATH}
@@ -36,8 +42,10 @@ target_include_directories(ServerCluster PRIVATE
         Jobs
         Jobs/Operations/Handler
         Jobs/Operations/Sleep
+        Jobs/Operations/Primes
         Globals
         Config
+        Jobs/Operations/PrimeDivizors
 )
 
 target_link_directories(ServerCluster PRIVATE
@@ -48,4 +56,5 @@ target_link_libraries(
         ServerCluster PRIVATE
         msmpi
         Threads::Threads
+        OpenMP::OpenMP_C
     )
