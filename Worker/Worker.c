@@ -9,14 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../Jobs/Job.h"
-
-static void handleCommand(jobType_t jobType, char *params) {
-    char result[100];
-    sprintf(result, "%d %s", jobType, params);
-    MPI_Send(result, strlen(result) + 1, MPI_CHAR, 0, jobType, MPI_COMM_WORLD);
-
-    free(params);
-}
+#include "../Jobs/Operations/Handler/ExecuteJobHandler.h"
 
 void runWorker() {
     int size = 0;
@@ -40,13 +33,13 @@ void runWorker() {
         fflush(stdout);
         if(params == NULL) {
             perror("Eroare alocare");
-            //MPI_Abort(MPI_COMM_WORLD, 1);
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
 
         MPI_Recv(params, size, MPI_CHAR, 0, status.MPI_TAG, MPI_COMM_WORLD, &status);
 
         jobType_t jobType = status.MPI_TAG;
 
-        handleCommand(jobType, params);
+        executeJobHandler(jobType, params);
     }
 }
