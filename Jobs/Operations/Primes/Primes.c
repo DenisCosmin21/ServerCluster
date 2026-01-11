@@ -45,7 +45,12 @@ static void markPrimesFromPosition(ssize_t currentPrime, ssize_t lastMax) {
 }
 
 char *computePrimes(size_t n) {
-    static char buffer[20]; //Buffer for result
+    char *buffer = malloc(sizeof(char) * 20);
+
+    if(buffer == NULL) {
+        perror("Eroare alocare");
+        exit(-1);
+    }
 
     if (primes != NULL && (ssize_t)n < maxN) {
         snprintf(buffer, sizeof(buffer), "%llu", primes[n].countUpTo);

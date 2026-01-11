@@ -9,7 +9,13 @@
 #include "../../../Globals/globals.h"
 
 char *computePrimeDivizorsCount(size_t n) {
-    static char buffer[20];
+
+    char *buffer = malloc(sizeof(char) * 20);
+
+    if(buffer == NULL) {
+        perror("Eroare alocare");
+        exit(-1);
+    }
 
     size_t result = 0;
 
