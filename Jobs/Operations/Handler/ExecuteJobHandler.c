@@ -11,6 +11,7 @@
 #include "../Primes/Primes.h"
 #include "../PrimeDivizors/PrimeDivisors.h"
 #include "../../Job.h"
+#include "Operations/Anagrams/Anagrams.h"
 
 
 void executeJobHandler(jobType_t jobType, char *params) {
@@ -27,12 +28,18 @@ void executeJobHandler(jobType_t jobType, char *params) {
             result = computePrimeDivizorsCount(number);
             break;
         }
+        case ANAGRAMS: {
+            result = computeAnagrams(params);
+            break;
+        }
         default: {
-            result = "Job not supported\n";
+            result = malloc(20 * sizeof(char));
+            strcpy(result, "Job not supported");
             break;
         }
     }
 
     fflush(stdout);
     MPI_Send(result, strlen(result) + 1, MPI_CHAR, 0, jobType, MPI_COMM_WORLD);
+    free(result);
 }
