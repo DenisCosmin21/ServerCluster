@@ -5,9 +5,9 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 #include "../Queue/DoubleLinkedListQueue.h"
-#include "ResponseHandler.h"
 #include "../Jobs/Job.h"
 #include <Windows.h>
+#include "Primes.h"
 
 extern int * workers;
 
@@ -30,4 +30,7 @@ extern CONDITION_VARIABLE responseAvailableCondition;
 extern CRITICAL_SECTION commandAvailableMutex;
 extern CRITICAL_SECTION workerAvailableMutex;
 extern CRITICAL_SECTION responseAvailableMutex;
+
+extern prime_t *primes;
+extern ssize_t maxN;
 #endif //GLOBALS_H

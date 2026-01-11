@@ -3,16 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../../Config/config.h"
-
+#include "../../../Globals/globals.h"
 #define PARALLEL_THRESHOLD 2000
-
-typedef struct {
-    size_t countUpTo;
-    short notPrime;
-} prime_t;
-
-static prime_t *primes = NULL;
-static ssize_t maxN = 0;
 
 static void markPrimes(ssize_t currentPrime) {
     ssize_t start = currentPrime * currentPrime;
@@ -100,4 +92,11 @@ char *computePrimes(size_t n) {
 
     snprintf(buffer, 20, "%llu", primes[n].countUpTo);
     return buffer;
+}
+
+void cleanupPrimes(void) {
+    if(primes != NULL) {
+        free(primes);
+        maxN = 0;
+    }
 }

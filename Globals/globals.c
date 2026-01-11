@@ -4,7 +4,6 @@
 
 #include "globals.h"
 #include <stddef.h>
-#include "ResponseHandler.h"
 #include "../Jobs/Job.h"
 #include <Windows.h>
 
@@ -25,3 +24,6 @@ CONDITION_VARIABLE responseAvailableCondition;
 CRITICAL_SECTION commandAvailableMutex;
 CRITICAL_SECTION workerAvailableMutex;
 CRITICAL_SECTION responseAvailableMutex;
+
+prime_t *primes = NULL;
+ssize_t maxN = 0;
