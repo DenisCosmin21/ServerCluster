@@ -60,8 +60,8 @@ static job_t readResponseFromJob(MPI_Status *status) {
 
     finishedJob->params = response;
 
-    printf("Finish job by worker %d: \n", status->MPI_SOURCE);
-    fflush(stdout);
+    //printf("Finish job by worker %d: \n", status->MPI_SOURCE);
+    //fflush(stdout);
 
     return finishedJob;
 }
@@ -98,12 +98,9 @@ static job_t waitForResponse(void) {
 }
 
 DWORD WINAPI saveResponses(LPVOID lpParam) {
-    FILE *responseFile = fopen("C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\resources.txt", "w");
+    char baseFileName[256] = "C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\response";
 
-    if(responseFile == NULL) {
-        perror("Error opening response file\n");
-        exit(-1);
-    }
+
 
     while(availableResponses()) {
         //Wait for a response to exist to not poll
@@ -113,13 +110,26 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
 
         LeaveCriticalSection(&responseAvailableMutex);
 
+        char fileName[256];
+
+        sprintf(fileName, "%s%llu.txt", baseFileName, response->jobId);
+
+        FILE *responseFile = fopen(fileName, "w");
+
+        if(responseFile == NULL) {
+            perror("Error opening response file\n");
+            exit(-1);
+        }
+
         fprintf(responseFile, "%s\n", response->params);
         fflush(responseFile);
+
+        fclose(responseFile);
 
         free(response->params);
         free(response);
     }
 
-    fclose(responseFile);
+
     return 0;
 }
