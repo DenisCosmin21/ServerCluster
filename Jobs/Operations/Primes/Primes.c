@@ -52,9 +52,12 @@ static void markPrimesFromPosition(ssize_t currentPrime, ssize_t lastMax) {
     }
 }
 
-size_t computePrimes(size_t n) {
+char *computePrimes(size_t n) {
+    static char buffer[20]; //Buffer for result
+
     if (primes != NULL && (ssize_t)n < maxN) {
-        return primes[n].countUpTo;
+        snprintf(buffer, sizeof(buffer), "%llu", primes[n].countUpTo);
+        return buffer;
     }
 
     ssize_t lastMax = maxN;
@@ -75,10 +78,8 @@ size_t computePrimes(size_t n) {
         lastMax = 2;
     }
 
-    int shouldParallelize = (maxN - lastMax > PARALLEL_THRESHOLD);
-
     #pragma omp parallel num_threads(THREAD_COUNT) default(none) \
-                         shared(primes, maxN, lastMax) if(shouldParallelize)
+                         shared(primes, maxN, lastMax)
     {
         for (ssize_t i = 2; i < lastMax; i++) {
             if (primes[i].notPrime == 0) {
@@ -97,5 +98,6 @@ size_t computePrimes(size_t n) {
         primes[i].countUpTo = primes[i - 1].countUpTo + (primes[i].notPrime == 0 ? 1 : 0);
     }
 
-    return primes[n].countUpTo;
+    snprintf(buffer, 20, "%llu", primes[n].countUpTo);
+    return buffer;
 }

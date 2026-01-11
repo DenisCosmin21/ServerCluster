@@ -6,5 +6,5 @@
 #define PRIMES_H
 #include <stddef.h>
 
-size_t computePrimes(size_t n);
+char *computePrimes(size_t n);
 #endif //PRIMES_H
