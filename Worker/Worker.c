@@ -11,6 +11,7 @@
 #include "../Jobs/Job.h"
 #include "../Jobs/Operations/Handler/ExecuteJobHandler.h"
 #include "../Jobs/Operations/Primes/Primes.h"
+#include "Operations/Anagrams/Anagrams.h"
 
 static void cleanupWorker(void) {
     cleanupPrimes();
@@ -21,6 +22,7 @@ void runWorker() {
 
     MPI_Status status;
 
+    initAnagrams();
     while(1) {
         MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
