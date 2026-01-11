@@ -30,7 +30,9 @@ add_executable(ServerCluster main.c
         Jobs/Operations/PrimeDivizors/PrimeDivisors.c
         Jobs/Operations/Handler/ExecuteJobHandler.c
         Jobs/Operations/Handler/ExecuteJobHandler.h
-        )
+        Jobs/Operations/Anagrams/Anagrams.c
+        Jobs/Operations/Anagrams/Anagrams.h
+)
 
 target_include_directories(ServerCluster PRIVATE
         ${MPI_INCLUDE_PATH}
