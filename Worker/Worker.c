@@ -10,6 +10,11 @@
 #include <string.h>
 #include "../Jobs/Job.h"
 #include "../Jobs/Operations/Handler/ExecuteJobHandler.h"
+#include "../Jobs/Operations/Primes/Primes.h"
+
+static void cleanupWorker(void) {
+    cleanupPrimes();
+}
 
 void runWorker() {
     int size = 0;
@@ -21,6 +26,7 @@ void runWorker() {
 
         //Finnish the work if the stop work tag is sent
         if(status.MPI_TAG == STOP_WORKING) {
+            cleanupWorker();
             char finishBuff;
             MPI_Recv(&finishBuff, 1, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             break;
@@ -30,7 +36,6 @@ void runWorker() {
 
         char *params = malloc(size * sizeof(char));
 
-        fflush(stdout);
         if(params == NULL) {
             perror("Eroare alocare");
             MPI_Abort(MPI_COMM_WORLD, 1);
