@@ -32,6 +32,8 @@ static void initAvailableWorkers(void) {
         assignedJobs[i] = NULL;
         enqueue(availableWorkers, &workers[i]);
     }
+
+    memset(chunksReachedPerJob, 0, sizeof(chunksReachedPerJob));
 }
 
 static void clearResponseFiles(void) {
