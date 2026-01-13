@@ -9,5 +9,5 @@
 #define THREAD_COUNT 8
 #define MATRIX_SIZE_THRESHOLD 20
 #define MAX_JOBS_PER_JOB 8
-
+#define LOG_FILE "Resources/Logs/logs.txt"
 #endif //CONFIG_H
