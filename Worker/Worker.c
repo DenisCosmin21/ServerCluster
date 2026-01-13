@@ -12,41 +12,65 @@
 #include "../Jobs/Operations/Handler/ExecuteJobHandler.h"
 #include "../Jobs/Operations/Primes/Primes.h"
 #include "Operations/Anagrams/Anagrams.h"
+#include "../../Globals/globals.h"
 
 static void cleanupWorker(void) {
     cleanupPrimes();
 }
 
-void runWorker() {
+char *listenForData(MPI_Status *status) {
+    if(status == NULL) {
+        MPI_Status localStatus;
+        status = &localStatus;
+    }
+
     int size = 0;
 
-    MPI_Status status;
+    MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, status);
+
+    //Finnish the work if the stop work tag is sent
+    if(status->MPI_TAG == STOP_WORKING) {
+        cleanupWorker();
+        char finishBuff;
+        MPI_Recv(&finishBuff, 1, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, status);
+
+        return NULL;
+    }
+
+    MPI_Get_count(status, MPI_CHAR, &size);
+
+    char *params = malloc(size * sizeof(char));
+
+    if(params == NULL) {
+        perror("Eroare alocare");
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    MPI_Recv(params, size, MPI_CHAR, 0, status->MPI_TAG, MPI_COMM_WORLD, status);
+
+    return params;
+}
+
+void runWorker() {
+
 
     initAnagrams();
     while(1) {
-        MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Status status;
 
-        //Finnish the work if the stop work tag is sent
-        if(status.MPI_TAG == STOP_WORKING) {
-            cleanupWorker();
-            char finishBuff;
-            MPI_Recv(&finishBuff, 1, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        char *params = listenForData(&status);
+
+        if(params == NULL)
             break;
-        }
 
-        MPI_Get_count(&status, MPI_CHAR, &size);
-
-        char *params = malloc(size * sizeof(char));
-
-        if(params == NULL) {
-            perror("Eroare alocare");
-            MPI_Abort(MPI_COMM_WORLD, 1);
-        }
-
-        MPI_Recv(params, size, MPI_CHAR, 0, status.MPI_TAG, MPI_COMM_WORLD, &status);
+        printf("Worker %d received a job\n", rank);
+        printf("Data : %s\n", params);
+        fflush(stdout);
 
         jobType_t jobType = status.MPI_TAG;
 
         executeJobHandler(jobType, params);
+
+        free(params);
     }
 }

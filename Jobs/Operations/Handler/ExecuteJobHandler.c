@@ -8,10 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../Worker/Worker.h"
 #include "../Primes/Primes.h"
 #include "../PrimeDivizors/PrimeDivisors.h"
 #include "../../Job.h"
 #include "Operations/Anagrams/Anagrams.h"
+#include "Operations/Matrix/MatrixAdd/MatrixAdd.h"
 
 
 void executeJobHandler(jobType_t jobType, char *params) {

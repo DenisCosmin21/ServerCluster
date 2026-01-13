@@ -4,7 +4,10 @@
 
 #ifndef WORKER_H
 #define WORKER_H
+#include <mpi.h>
+
 #include "../Utilities/Utilities.h"
+char *listenForData(MPI_Status *status);
 
 void runWorker(void);
 #endif //WORKER_H
