@@ -33,4 +33,6 @@ extern CRITICAL_SECTION responseAvailableMutex;
 
 extern prime_t *primes;
 extern ssize_t maxN;
+
+extern int rank;
 #endif //GLOBALS_H

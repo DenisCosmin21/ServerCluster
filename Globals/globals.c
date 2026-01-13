@@ -27,3 +27,5 @@ CRITICAL_SECTION responseAvailableMutex;
 
 prime_t *primes = NULL;
 ssize_t maxN = 0;
+
+int rank = 0;
