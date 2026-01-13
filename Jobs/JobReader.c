@@ -37,7 +37,7 @@ job_t readCommand(FILE* file) {
 
     command[current_length - 1] = '\0';
 
-    jobType_t jobType = getJobType(command);
+    jobType_t jobType = getJobTypeFromCommand(command);
 
     current_length = 0;
 

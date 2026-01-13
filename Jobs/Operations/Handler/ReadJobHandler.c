@@ -22,6 +22,7 @@ void readJobHandler(job_t job) {
     switch (job->jobType) {
         case WAIT : {
             waitJob(job->params);
+            destructJob(job);
             return;
         }
         case MATRIXADD : {
