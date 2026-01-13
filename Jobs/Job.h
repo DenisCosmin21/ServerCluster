@@ -28,7 +28,9 @@ typedef struct job * job_t;
 
 job_t newJob(jobType_t jobType, char *params, char *additionalParam, uint64_t jobId, uint64_t chunkId);
 
-jobType_t getJobType(const char *command);
+jobType_t getJobTypeFromCommand(const char *command);
+
+char* getJobType(job_t job);
 
 void printJob(job_t job);
 

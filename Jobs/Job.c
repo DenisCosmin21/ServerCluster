@@ -26,7 +26,7 @@ job_t newJob(jobType_t jobType, char *params, char *additionalParam, uint64_t jo
     return newJob;
 }
 
-jobType_t getJobType(const char *command) {
+jobType_t getJobTypeFromCommand(const char *command) {
     if(strcmp(command, "PRIMES") == 0)
         return PRIMES;
 
@@ -45,6 +45,17 @@ jobType_t getJobType(const char *command) {
     return WAIT;
 }
 
+char *getJobType(job_t job) {
+    switch(job->jobType) {
+        case PRIMES: return "PRIMES";
+        case PRIMEDIVISORS: return "PRIMEDIVISORS";
+        case ANAGRAMS: return "ANAGRAMS";
+        case MATRIXADD: return "MATRIXADD";
+        case MATRIXMULT: return "MATRIXMULT";
+        case WAIT: return "WAIT";
+        default: return "WAIT";
+    }
+}
 void destructJob(job_t job) {
     if(job->params != NULL)
         free(job->params);
