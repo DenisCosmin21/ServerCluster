@@ -11,7 +11,7 @@
 #include <Windows.h>
 
 static int availableJobs(void) {
-    return finishedReading == 0 || !is_empty(jobQueue);
+    return finishedReading == 0 || !is_empty(jobQueue) || get_size(availableWorkers) != (totalWorkers - 1);;
 }
 
 static int availableResponses(void) {
