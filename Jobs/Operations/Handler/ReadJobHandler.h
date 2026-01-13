@@ -8,5 +8,6 @@
 
 void readJobHandler(job_t job);
 
+void enqueueJob(job_t job);
 #endif //READJOBHANDLER_H
 
