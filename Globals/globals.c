@@ -32,4 +32,4 @@ int rank = 0;
 
 int chunksReachedPerJob[1024];
 
-const char resourcesDirectory[] = "Resources";
+const char resourcesDirectory[] = "Resources/Responses";
