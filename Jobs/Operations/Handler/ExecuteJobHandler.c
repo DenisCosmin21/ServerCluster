@@ -14,7 +14,7 @@
 #include "../../Job.h"
 #include "Operations/Anagrams/Anagrams.h"
 #include "Operations/Matrix/MatrixAdd/MatrixAdd.h"
-
+#include "../../Globals/globals.h"
 
 void executeJobHandler(jobType_t jobType, char *params) {
     char *result;
@@ -51,5 +51,6 @@ void executeJobHandler(jobType_t jobType, char *params) {
 
     fflush(stdout);
     MPI_Send(result, strlen(result) + 1, MPI_CHAR, 0, jobType, MPI_COMM_WORLD);
+
     free(result);
 }

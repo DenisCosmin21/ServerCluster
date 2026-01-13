@@ -29,3 +29,7 @@ prime_t *primes = NULL;
 ssize_t maxN = 0;
 
 int rank = 0;
+
+int chunksReachedPerJob[1024];
+
+const char resourcesDirectory[] = "Resources";

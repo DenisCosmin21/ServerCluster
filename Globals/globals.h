@@ -35,4 +35,8 @@ extern prime_t *primes;
 extern ssize_t maxN;
 
 extern int rank;
+
+extern int chunksReachedPerJob[1024];
+
+extern const char resourcesDirectory[];
 #endif //GLOBALS_H
