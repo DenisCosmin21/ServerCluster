@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "../Jobs/Job.h"
 #include "../Globals/globals.h"
+#include "../Logger/Logger.h"
 
 static void finishWorkers(void) {
     char test = 0;
@@ -33,4 +34,6 @@ void cleanDispatcher(HANDLE *threads) {
     DeleteCriticalSection(&responseAvailableMutex);
 
     finishWorkers();
+
+    freeLogger();
 }
