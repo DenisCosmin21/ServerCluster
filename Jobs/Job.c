@@ -45,6 +45,16 @@ jobType_t getJobType(const char *command) {
     return WAIT;
 }
 
+void destructJob(job_t job) {
+    if(job->params != NULL)
+        free(job->params);
+
+    if(job->additionalParam != NULL)
+        free(job->additionalParam);
+
+    free(job);
+}
+
 void printJob(job_t job) {
     if(job == NULL)
         return;
