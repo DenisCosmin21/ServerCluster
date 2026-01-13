@@ -25,8 +25,6 @@ void readJobHandler(job_t job) {
             return;
         }
         case MATRIXADD : {
-            printf("MATRIXADD\n");
-            fflush(stdout);
             matrixAddHandler(job);
             return;
         }

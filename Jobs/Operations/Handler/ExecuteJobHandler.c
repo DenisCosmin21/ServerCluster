@@ -49,7 +49,6 @@ void executeJobHandler(jobType_t jobType, char *params) {
         }
     }
 
-    fflush(stdout);
     MPI_Send(result, strlen(result) + 1, MPI_CHAR, 0, jobType, MPI_COMM_WORLD);
 
     free(result);

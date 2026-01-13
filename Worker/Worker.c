@@ -63,10 +63,6 @@ void runWorker() {
         if(params == NULL)
             break;
 
-        printf("Worker %d received a job\n", rank);
-        printf("Data : %s\n", params);
-        fflush(stdout);
-
         jobType_t jobType = status.MPI_TAG;
 
         executeJobHandler(jobType, params);
