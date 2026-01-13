@@ -115,9 +115,7 @@ static job_t waitForResponse(void) {
 }
 
 DWORD WINAPI saveResponses(LPVOID lpParam) {
-    char baseFileName[256] = "C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\response";
-
-
+    char baseFileName[] = "Resources\\response";
 
     while(availableResponses()) {
         //Wait for a response to exist to not poll
