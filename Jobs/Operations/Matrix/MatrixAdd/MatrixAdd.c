@@ -53,5 +53,6 @@ char *computeMatrixAdd(char *matrix1, char *matrix2) {
         }
     }
 
+    outputBuffer[bufferPos - 1] = '\0';
     return outputBuffer;
 }
