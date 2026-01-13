@@ -57,6 +57,9 @@ DWORD WINAPI dispatchCommands(LPVOID lpParam) {
         assignedJobs[worker - 1] = job;
 
         MPI_Send(job->params, strlen(job->params) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);
+
+        if(job->additionalParam != NULL)
+            MPI_Send(job->additionalParam, strlen(job->additionalParam) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);
     }
 
     return 0;
