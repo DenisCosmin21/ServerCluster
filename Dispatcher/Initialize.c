@@ -34,8 +34,41 @@ static void initAvailableWorkers(void) {
     }
 }
 
+static void clearResponseFiles(void) {
+    WIN32_FIND_DATA findFileData;
+    char searchPath[MAX_PATH];
+
+    // Construct the search pattern (e.g., "Resources\*response*")
+    snprintf(searchPath, sizeof(searchPath), "%s\\*response*", resourcesDirectory);
+
+    HANDLE hFind = FindFirstFile(searchPath, &findFileData);
+
+    if (hFind == INVALID_HANDLE_VALUE) {
+        // No files found or directory doesn't exist
+        return;
+    }
+
+    do {
+        // Ensure we are deleting a file and not a directory
+        if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            char filePath[MAX_PATH];
+            snprintf(filePath, sizeof(filePath), "%s\\%s", resourcesDirectory, findFileData.cFileName);
+
+            if (!DeleteFile(filePath)) {
+                fprintf(stderr, "Failed to delete: %s (Error: %lu)\n", filePath, GetLastError());
+            } else {
+                // Optional: printf("Deleted old response file: %s\n", filePath);
+            }
+        }
+    } while (FindNextFile(hFind, &findFileData) != 0);
+
+    FindClose(hFind);
+}
+
 void initializeDispatcher(HANDLE *threads) {
-    queue_init(&jobQueue);
+    clearResponseFiles();
+
+   queue_init(&jobQueue);
     queue_init(&responseQueue);
     initAvailableWorkers();
 
