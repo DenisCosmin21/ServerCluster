@@ -19,15 +19,18 @@ typedef enum {
 struct job{
     jobType_t jobType;
     char *params;
+    char *additionalParam;
     uint64_t jobId;
     uint64_t chunkId;
 };
 
 typedef struct job * job_t;
 
-job_t newJob(jobType_t jobType, char *params, uint64_t jobId, uint64_t chunkId);
+job_t newJob(jobType_t jobType, char *params, char *additionalParam, uint64_t jobId, uint64_t chunkId);
 
 jobType_t getJobType(const char *command);
 
 void printJob(job_t job);
+
+void destructJob(job_t job);
 #endif //JOB_H
