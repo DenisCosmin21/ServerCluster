@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-job_t newJob(jobType_t jobType, char *params, uint64_t jobId, uint64_t chunkId) {
+job_t newJob(jobType_t jobType, char *params, char *additionalParam, uint64_t jobId, uint64_t chunkId) {
     job_t newJob = malloc(sizeof(struct job));
 
     if(newJob == NULL) {
@@ -19,6 +19,7 @@ job_t newJob(jobType_t jobType, char *params, uint64_t jobId, uint64_t chunkId) 
 
     newJob->jobType = jobType;
     newJob->params = params;
+    newJob->additionalParam = additionalParam;
     newJob->jobId = jobId;
     newJob->chunkId = chunkId;
 
@@ -51,6 +52,8 @@ void printJob(job_t job) {
     printf("Job :\n");
     printf("\tJob Type: %d\n", job->jobType);
     printf("\tJob params: %s\n", job->params);
+    if(job->additionalParam != NULL)
+        printf("\tAdditional param: %s\n", job->additionalParam);
     printf("\tJob ID: %llu\n", job->jobId);
     printf("\tChunk ID: %llu\n", job->chunkId);
 
