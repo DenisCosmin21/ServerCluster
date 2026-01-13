@@ -32,6 +32,14 @@ void executeJobHandler(jobType_t jobType, char *params) {
             result = computeAnagrams(params);
             break;
         }
+        case MATRIXADD: {
+            printf("Matrix add job\n");
+            fflush(stdout);
+            char *additionalParams = listenForData(NULL);
+            result = computeMatrixAdd(params, additionalParams);
+            free(additionalParams);
+            break;
+        }
         default: {
             result = malloc(20 * sizeof(char));
             strcpy(result, "Job not supported");
