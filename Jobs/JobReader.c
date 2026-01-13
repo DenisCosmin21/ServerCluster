@@ -52,5 +52,5 @@ job_t readCommand(FILE* file) {
 
     command[current_length - 1] = '\0';
 
-    return newJob(jobType, command, currentJobId++, 0);
+    return newJob(jobType, command, 0x00, currentJobId++, 0);
 }

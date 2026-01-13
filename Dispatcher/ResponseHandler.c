@@ -126,8 +126,7 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
 
         fclose(responseFile);
 
-        free(response->params);
-        free(response);
+        destructJob(response);
     }
 
 
