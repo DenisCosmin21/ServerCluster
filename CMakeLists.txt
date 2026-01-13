@@ -32,6 +32,11 @@ add_executable(ServerCluster main.c
         Jobs/Operations/Handler/ExecuteJobHandler.h
         Jobs/Operations/Anagrams/Anagrams.c
         Jobs/Operations/Anagrams/Anagrams.h
+        Jobs/Operations/Matrix/MatrixAdd/MatrixAdd.c
+        Jobs/Operations/Handler/MatrixHandler.c
+        Jobs/Operations/Handler/MatrixHandler.c
+        Jobs/Operations/Matrix/MatrixProduct/MatrixMult.c
+        Jobs/Operations/Matrix/MatrixProduct/MatrixMult.h
 )
 
 target_include_directories(ServerCluster PRIVATE
