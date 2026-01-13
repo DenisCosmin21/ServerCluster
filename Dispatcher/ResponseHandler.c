@@ -131,7 +131,7 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
 
         sprintf(fileName, "%s%llu.txt", baseFileName, response->jobId);
 
-        FILE *responseFile = fopen(fileName, "w");
+        FILE *responseFile = fopen(fileName, "a");
 
         if(responseFile == NULL) {
             perror("Error opening response file\n");
