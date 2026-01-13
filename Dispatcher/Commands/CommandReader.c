@@ -15,7 +15,7 @@ static void printQueueJob(void *job) {
 }
 
 DWORD WINAPI readCommands(LPVOID lpParam) {
-    FILE *commandFile = fopen("C:\\Users\\Denis\\CLionProjects\\ServerCluster\\Resources\\commands.txt", "r");
+    FILE *commandFile = fopen("Resources\\commands.txt", "r");
 
     if (commandFile == NULL) {
         perror("Error opening command file\n");
