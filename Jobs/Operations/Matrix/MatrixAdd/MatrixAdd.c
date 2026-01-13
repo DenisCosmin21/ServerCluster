@@ -9,6 +9,8 @@
 #include <string.h>
 
 char *computeMatrixAdd(char *matrix1, char *matrix2) {
+    size_t totalBufferSize = strlen(matrix1) + strlen(matrix2) + 100;
+
     char *outputBuffer = malloc(strlen(matrix1) + strlen(matrix2)); //A little more space to make sure it won't overflow
 
     if (outputBuffer == NULL) {
@@ -41,7 +43,11 @@ char *computeMatrixAdd(char *matrix1, char *matrix2) {
 
         result = elem1 + elem2;
 
-        bufferPos += snprintf(outputBuffer + bufferPos, resultSize + 1 , "%ld ", result);
+        int written = snprintf(outputBuffer + bufferPos, totalBufferSize - bufferPos , "%ld ", result);
+
+        if (written > 0) {
+            bufferPos += written;
+        }
 
         ptrElem1 = nextElem1;
         ptrElem2 = nextElem2;
