@@ -8,6 +8,13 @@
 #include "../../../Globals/globals.h"
 #include "../Sleep/WaitJob.h"
 
+void enqueueJob(job_t job) {
+    EnterCriticalSection(&commandAvailableMutex);
+    enqueue(jobQueue, job);
+    WakeConditionVariable(&commandAvailableCondition);
+    LeaveCriticalSection(&commandAvailableMutex);
+}
+
 void readJobHandler(job_t job) {
     switch (job->jobType) {
         case WAIT : {
@@ -18,8 +25,5 @@ void readJobHandler(job_t job) {
         default: break;
     }
 
-    EnterCriticalSection(&commandAvailableMutex);
-    enqueue(jobQueue, job);
-    WakeConditionVariable(&commandAvailableCondition);
-    LeaveCriticalSection(&commandAvailableMutex);
+    enqueueJob(job);
 }
