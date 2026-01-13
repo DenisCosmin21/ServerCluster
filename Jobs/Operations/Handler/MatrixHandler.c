@@ -160,32 +160,46 @@ void matrixAddHandler(job_t job) {
     size_t chunkSize = matrixSize / MAX_JOBS_PER_JOB;
     size_t lastChunk = matrixSize % MAX_JOBS_PER_JOB + chunkSize;
 
+    matrixSize = getMatrixSize(file2);
+
     while(chunk <= MAX_JOBS_PER_JOB) {
-        firstMatrix = malloc(chunkSize * sizeof(char) * 9 * matrixSize);
-
-        if(firstMatrix == NULL) {
-            perror("malloc");
-            exit(-1);
-        }
-
-        secondMatrix = malloc(chunkSize * sizeof(char) * 9 * matrixSize);
-
-        if(secondMatrix == NULL) {
-            perror("malloc");
-            exit(-1);
-        }
-
         //If we are on the last job created we should span it on all the lines
         if(chunk == MAX_JOBS_PER_JOB) {
+            firstMatrix = malloc(chunkSize * sizeof(char) * 9 * matrixSize);
+
+            if(firstMatrix == NULL) {
+                perror("malloc");
+                exit(-1);
+            }
+
+            secondMatrix = malloc(chunkSize * sizeof(char) * 9 * matrixSize);
+
+            if(secondMatrix == NULL) {
+                perror("malloc");
+                exit(-1);
+            }
             readMatrixChunk(file1, firstMatrix, lastChunk, matrixSize);
             readMatrixChunk(file2, secondMatrix, lastChunk, matrixSize);
         }
         else {
+            firstMatrix = malloc(lastChunk * sizeof(char) * 9 * matrixSize);
+
+            if(firstMatrix == NULL) {
+                perror("malloc");
+                exit(-1);
+            }
+
+            secondMatrix = malloc(lastChunk * sizeof(char) * 9 * matrixSize);
+
+            if(secondMatrix == NULL) {
+                perror("malloc");
+                exit(-1);
+            }
             readMatrixChunk(file1, firstMatrix, chunkSize, matrixSize);
-            readMatrixChunk(file2, secondMatrix, lastChunk, matrixSize);
+            readMatrixChunk(file2, secondMatrix, chunkSize, matrixSize);
         }
 
-        job_t jobToAdd = newJob(MATRIXMULT, firstMatrix, secondMatrix, job->jobId, chunk);
+        job_t jobToAdd = newJob(MATRIXADD, firstMatrix, secondMatrix, job->jobId, chunk);
 
         enqueueJob(jobToAdd);
 
