@@ -93,14 +93,21 @@ static job_t dequeueJobResponse(void) {
 static job_t waitForResponse(void) {
     job_t response = dequeueJobResponse();
 
-    while(response == NULL) {
-        SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
-        response = dequeue(responseQueue);
+    while(response == NULL || response->chunkId != 0) {
+        if(response != NULL) {
+            if(chunksReachedPerJob[response->jobId] == response->chunkId - 1) {
+                chunksReachedPerJob[response->jobId] = response->chunkId;
+                break;
+            }
+            if(get_size(responseQueue) == 0)
+                SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
 
-        while(response->chunkId != 0) {
-            SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
             enqueue(responseQueue, response);
             response = dequeueJobResponse();
+        }
+        else {
+            SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
+            response = dequeueJobResponse();;
         }
     }
 
