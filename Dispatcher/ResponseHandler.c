@@ -12,12 +12,26 @@
 
 #include "../Logger/Logger.h"
 
-static int availableJobs(void) {
-    return finishedReading == 0 || !is_empty(jobQueue) || get_size(availableWorkers) != (totalWorkers - 1);;
+static int availableJobs(void) {EnterCriticalSection(&commandAvailableMutex);
+    int partialResp = finishedReading == 0 || !is_empty(jobQueue);
+    LeaveCriticalSection(&commandAvailableMutex);
+    EnterCriticalSection(&workerAvailableMutex);
+    int resp = partialResp || (get_size(availableWorkers) != (totalWorkers - 1));
+    LeaveCriticalSection(&workerAvailableMutex);
+    return resp;
 }
 
 static int availableResponses(void) {
-    return finishedReading == 0 || !is_empty(responseQueue) || !is_empty(jobQueue) || get_size(availableWorkers) != totalWorkers - 1;
+    EnterCriticalSection(&commandAvailableMutex);
+    int partialResp = finishedReading == 0 || !is_empty(jobQueue);
+    LeaveCriticalSection(&commandAvailableMutex);
+    EnterCriticalSection(&workerAvailableMutex);
+    partialResp = partialResp || (get_size(availableWorkers) != (totalWorkers - 1));
+    LeaveCriticalSection(&workerAvailableMutex);
+    EnterCriticalSection(&responseAvailableMutex);
+    int resp = partialResp || !is_empty(responseQueue);
+    LeaveCriticalSection(&responseAvailableMutex);
+    return resp;
 }
 
 static void handleResponse(job_t response, int worker) {

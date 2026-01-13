@@ -36,7 +36,9 @@ DWORD WINAPI readCommands(LPVOID lpParam) {
         readJobHandler(job);
     }
 
+    EnterCriticalSection(&commandAvailableMutex);
     finishedReading = 1;
+    LeaveCriticalSection(&commandAvailableMutex);
     fclose(commandFile);
 
     sprintf(log, "Finished reading commands\n");

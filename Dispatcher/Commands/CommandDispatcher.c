@@ -11,7 +11,10 @@
 #include "../../Jobs/Job.h"
 #include "../../Logger/Logger.h"
 static int availableCommands(void) {
-    return finishedReading == 0 || !is_empty(jobQueue);
+    EnterCriticalSection(&commandAvailableMutex);
+    int resp = finishedReading == 0 || !is_empty(jobQueue);
+    LeaveCriticalSection(&commandAvailableMutex);
+    return resp;
 }
 
 static int findAvailableWorker(void) {
