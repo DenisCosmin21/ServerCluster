@@ -80,8 +80,18 @@ DWORD WINAPI getResponses(LPVOID lpParam) {
     return 0;
 }
 
-static job_t waitForResponse(void) {
+static job_t dequeueJobResponse(void) {
+    EnterCriticalSection(&responseAvailableMutex);
+
     job_t response = dequeue(responseQueue);
+
+    LeaveCriticalSection(&responseAvailableMutex);
+
+    return response;
+}
+
+static job_t waitForResponse(void) {
+    job_t response = dequeueJobResponse();
 
     while(response == NULL) {
         SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
@@ -90,7 +100,7 @@ static job_t waitForResponse(void) {
         while(response->chunkId != 0) {
             SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
             enqueue(responseQueue, response);
-            response = dequeue(responseQueue);
+            response = dequeueJobResponse();
         }
     }
 
