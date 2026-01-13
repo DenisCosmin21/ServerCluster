@@ -9,7 +9,7 @@
 #include "../../Globals/globals.h"
 #include "../../Queue/DoubleLinkedListQueue.h"
 #include "../../Jobs/Job.h"
-
+#include "../../Logger/Logger.h"
 static int availableCommands(void) {
     return finishedReading == 0 || !is_empty(jobQueue);
 }
@@ -49,6 +49,12 @@ static job_t getNextJob() {
 }
 
 DWORD WINAPI dispatchCommands(LPVOID lpParam) {
+    char log[1024];
+
+    sprintf(log, "Starting dispatching jobs\n");
+
+    logData(log);
+
     while(availableCommands()) {
         int worker = findAvailableWorker();
 
@@ -56,11 +62,17 @@ DWORD WINAPI dispatchCommands(LPVOID lpParam) {
 
         assignedJobs[worker - 1] = job;
 
+        sprintf(log, "Dispatching job[Type = %s; JobId = %llu; ChunkId = %llu] to worker %d\n", getJobType(job), job->jobId, job->chunkId, worker);
+
+        logData(log);
+
         MPI_Send(job->params, strlen(job->params) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);
 
         if(job->additionalParam != NULL)
             MPI_Send(job->additionalParam, strlen(job->additionalParam) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);
     }
 
+    sprintf(log, "Finished dispatching jobs\n");
+    logData(log);
     return 0;
 }

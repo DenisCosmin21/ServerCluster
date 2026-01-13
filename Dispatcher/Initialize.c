@@ -11,6 +11,7 @@
 #include "ResponseHandler.h"
 #include "Commands/CommandDispatcher.h"
 #include "Commands/CommandReader.h"
+#include "../Logger/Logger.h"
 
 static void initAvailableWorkers(void) {
     queue_init(&availableWorkers);
