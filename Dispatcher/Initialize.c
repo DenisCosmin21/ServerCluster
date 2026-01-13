@@ -69,9 +69,11 @@ static void clearResponseFiles(void) {
 }
 
 void initializeDispatcher(HANDLE *threads) {
+    initLogger();
+
     clearResponseFiles();
 
-   queue_init(&jobQueue);
+    queue_init(&jobQueue);
     queue_init(&responseQueue);
     initAvailableWorkers();
 
