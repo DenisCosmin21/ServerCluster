@@ -3,6 +3,9 @@
 //
 
 #include "ReadJobHandler.h"
+
+#include "../Jobs/Operations/Handler/MatrixHandler.h"
+#include <stdio.h>
 #include <Windows.h>
 #include "../../../Queue/DoubleLinkedListQueue.h"
 #include "../../../Globals/globals.h"
@@ -19,6 +22,12 @@ void readJobHandler(job_t job) {
     switch (job->jobType) {
         case WAIT : {
             waitJob(job->params);
+            return;
+        }
+        case MATRIXADD : {
+            printf("MATRIXADD\n");
+            fflush(stdout);
+            matrixAddHandler(job);
             return;
         }
 
