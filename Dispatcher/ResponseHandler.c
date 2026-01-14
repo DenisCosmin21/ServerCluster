@@ -12,42 +12,121 @@
 
 #include "../Logger/Logger.h"
 
-static int availableJobs(void) {EnterCriticalSection(&commandAvailableMutex);
+static int availableJobs(void) {
+    EnterCriticalSection(&commandAvailableMutex);
+#ifdef DEBUG
+    printf("Locking command mutex in availableJobs\n");
+    fflush(stdout);
+#endif
     int partialResp = finishedReading == 0 || !is_empty(jobQueue);
+
+    #ifdef DEBUG
+    printf("Unlocking command mutex in availabel jobs : %d\n", partialResp);
+    #endif
+
     LeaveCriticalSection(&commandAvailableMutex);
+
     EnterCriticalSection(&workerAvailableMutex);
+
+    #ifdef DEBUG
+    printf("Locking worker mutex in availableJobs\n");
+    fflush(stdout);
+    #endif
+
     int resp = partialResp || (get_size(availableWorkers) != (totalWorkers - 1));
+
+    #ifdef DEBUG
+    printf("Unlocking worker mutex in available jobs : %d\n", resp);
+    fflush(stdout);
+    #endif
+
     LeaveCriticalSection(&workerAvailableMutex);
+
+
+
     return resp;
 }
 
 static int availableResponses(void) {
     EnterCriticalSection(&commandAvailableMutex);
+
+    #ifdef DEBUG
+    printf("Locking commandAvailableMutex in availableResponses\n");
+    fflush(stdout);
+    #endif
+
     int partialResp = finishedReading == 0 || !is_empty(jobQueue);
+
+    #ifdef DEBUG
+    printf("Unlocking AvailableMutex mutex in availableResponses : %d\n", partialResp);
+    fflush(stdout);
+    #endif
+
     LeaveCriticalSection(&commandAvailableMutex);
+
     EnterCriticalSection(&workerAvailableMutex);
+
+    #ifdef DEBUG
+    printf("Locking worker mutex in availableResponsess\n");
+    fflush(stdout);
+    #endif
+
     partialResp = partialResp || (get_size(availableWorkers) != (totalWorkers - 1));
+
+    #ifdef DEBUG
+    printf("Unlocking worker mutex in availableResponses : %d\n", partialResp);
+    fflush(stdout);
+    #endif
+
     LeaveCriticalSection(&workerAvailableMutex);
+
     EnterCriticalSection(&responseAvailableMutex);
+    #ifdef DEBUG
+    printf("Locking responses mutex in availableResponses\n");
+    fflush(stdout);
+    #endif
     int resp = partialResp || !is_empty(responseQueue);
+    #ifdef DEBUG
+    printf("Unlcoking responses mutex in availableResponses : %d\n", resp);
+    fflush(stdout);
+    #endif
     LeaveCriticalSection(&responseAvailableMutex);
+
     return resp;
 }
 
 static void handleResponse(job_t response, int worker) {
     EnterCriticalSection(&responseAvailableMutex);
 
-    enqueue(responseQueue, response);
+    #ifdef DEBUG
+    printf("Locking response mutex in handleResponse\n");
+    fflush(stdout);
+    #endif
 
+    enqueue(responseQueue, response);
     WakeConditionVariable(&responseAvailableCondition);
+
+    #ifdef DEBUG
+    printf("Unlocking response mutex in handleResponse\n");
+    fflush(stdout);
+    #endif
 
     LeaveCriticalSection(&responseAvailableMutex);
 
     EnterCriticalSection(&workerAvailableMutex);
 
-    enqueue(availableWorkers, &workers[worker - 1]);
+    #ifdef DEBUG
+    printf("Locking worker mutex in handleResponse\n");
+    fflush(stdout);
+    #endif
 
+    enqueue(availableWorkers, &workers[worker - 1]);
     WakeConditionVariable(&workerAvailableCondition);
+
+    #ifdef DEBUG
+    printf("Unlocking worker mutex in handleResponse : %d\n", worker);
+    fflush(stdout);
+    #endif
 
     LeaveCriticalSection(&workerAvailableMutex);
 }
@@ -56,7 +135,7 @@ static job_t readResponseFromJob(MPI_Status *status) {
     char *response = NULL;
     int responseSize = 0;
 
-    char log[2048];
+    char log[4096];
 
     MPI_Get_count(status, MPI_CHAR, &responseSize);
 
@@ -73,11 +152,7 @@ static job_t readResponseFromJob(MPI_Status *status) {
 
     MPI_Recv(response, responseSize, MPI_CHAR, status->MPI_SOURCE, status->MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    sprintf(log, "Received response for job[Type = %s; jobId = %llu ; chunkId = %llu] from worker %d\n", getJobType(finishedJob), finishedJob->jobId, finishedJob->chunkId, status->MPI_SOURCE);
-
-    logData(log);
-
-    sprintf(log, "Response from job : %s\n", response);
+    sprintf(log, "Received response for job[Type = %s; jobId = %llu ; chunkId = %llu] from worker %d\nResponse from job : %s\n", getJobType(finishedJob), finishedJob->jobId, finishedJob->chunkId, status->MPI_SOURCE, response);
 
     logData(log);
 
@@ -114,7 +189,17 @@ DWORD WINAPI getResponses(LPVOID lpParam) {
 static job_t dequeueJobResponse(void) {
     EnterCriticalSection(&responseAvailableMutex);
 
+    #ifdef DEBUG
+    printf("Locking response mutex in dequeueJobResponse\n");
+    fflush(stdout);
+    #endif
+
     job_t response = dequeue(responseQueue);
+
+#ifdef DEBUG
+    printf("Unlocking response mutex in dequeueJobResponse\n");
+    fflush(stdout);
+    #endif
 
     LeaveCriticalSection(&responseAvailableMutex);
 
@@ -130,15 +215,45 @@ static job_t waitForResponse(void) {
                 chunksReachedPerJob[response->jobId] = response->chunkId;
                 break;
             }
-            if(get_size(responseQueue) == 0)
+
+#ifdef DEBUG
+            printf("Waiting for valid responses in waitForResponses\n");
+            fflush(stdout);
+#endif
+
+            EnterCriticalSection(&responseAvailableMutex);
+
+            while(get_size(responseQueue) == 0) {
                 SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
+            }
+
+            LeaveCriticalSection(&responseAvailableMutex);
+
+            #ifdef DEBUG
+            printf("Found a possible response in waitForResponses\n");
+            fflush(stdout);
+            #endif
 
             enqueue(responseQueue, response);
             response = dequeueJobResponse();
         }
         else {
+            #ifdef DEBUG
+            printf("Waiting for valid responses in waitForResponses\n");
+            fflush(stdout);
+            #endif
+
+            EnterCriticalSection(&responseAvailableMutex);
+
             SleepConditionVariableCS(&responseAvailableCondition, &responseAvailableMutex, INFINITE);
             response = dequeueJobResponse();;
+
+            LeaveCriticalSection(&responseAvailableMutex);
+
+            #ifdef DEBUG
+            printf("Found a possible response in waitForResponses\n");
+            fflush(stdout);
+            #endif
         }
     }
 
@@ -154,12 +269,15 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
     char baseFileName[] = "Resources\\Responses\\response";
 
     while(availableResponses()) {
-        //Wait for a response to exist to not poll
-        EnterCriticalSection(&responseAvailableMutex);
-
         job_t response = waitForResponse();
 
-        LeaveCriticalSection(&responseAvailableMutex);
+        sprintf(log, "Saving Job with Id = %llu; and chunk = %llu\n", response->jobId, response->chunkId);
+
+        logData(log);
+#ifdef DEBUG
+        printf("Writing job response\n");
+        fflush(stdout);
+#endif
 
         char fileName[256];
 

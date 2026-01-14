@@ -37,11 +37,21 @@ DWORD WINAPI readCommands(LPVOID lpParam) {
     }
 
     EnterCriticalSection(&commandAvailableMutex);
+#ifdef DEBUG
+    printf("Locking commandAvailableMutex in readCommands\n");
+    fflush(stdout);
+#endif
     finishedReading = 1;
+#ifdef DEBUG
+    printf("Unlocking commandAvailableMutex in readCommands\n");
+    fflush(stdout);
+    #endif
     LeaveCriticalSection(&commandAvailableMutex);
+
     fclose(commandFile);
 
     sprintf(log, "Finished reading commands\n");
     logData(log);
+
     return 0;
 }

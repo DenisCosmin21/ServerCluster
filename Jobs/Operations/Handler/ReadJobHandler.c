@@ -13,9 +13,23 @@
 
 void enqueueJob(job_t job) {
     EnterCriticalSection(&commandAvailableMutex);
+
+#ifdef DEBUG
+    printf("Locking commandAvailableMutex in enqueueJob\n");
+    fflush(stdout);
+#endif
+
     enqueue(jobQueue, job);
     WakeConditionVariable(&commandAvailableCondition);
+
+    #ifdef DEBUG
+    printf("unlocking commandAvailableMutex in enqueueJob\n");
+    fflush(stdout);
+    #endif
+
     LeaveCriticalSection(&commandAvailableMutex);
+
+
 }
 
 void readJobHandler(job_t job) {
