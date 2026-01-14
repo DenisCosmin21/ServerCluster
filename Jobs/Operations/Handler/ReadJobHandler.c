@@ -5,11 +5,13 @@
 #include "ReadJobHandler.h"
 
 #include "../Jobs/Operations/Handler/MatrixHandler.h"
-#include <stdio.h>
+#include "../../Job.h"
 #include <Windows.h>
 #include "../../../Queue/DoubleLinkedListQueue.h"
 #include "../../../Globals/globals.h"
 #include "../Sleep/WaitJob.h"
+#include "../../../Config/config.h"
+#include "SerialHandler.h"
 
 void enqueueJob(job_t job) {
     EnterCriticalSection(&commandAvailableMutex);
@@ -51,5 +53,9 @@ void readJobHandler(job_t job) {
         default: break;
     }
 
+#if MODE == PARALLEL
     enqueueJob(job);
+#else
+    executeJob(job);
+#endif
 }
