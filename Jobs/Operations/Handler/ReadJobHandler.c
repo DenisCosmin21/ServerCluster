@@ -43,6 +43,10 @@ void readJobHandler(job_t job) {
             matrixAddHandler(job);
             return;
         }
+        case MATRIXMULT : {
+            matrixMultHandler(job);
+            return;
+        }
 
         default: break;
     }
