@@ -15,6 +15,7 @@
 #include "Operations/Anagrams/Anagrams.h"
 #include "Operations/Matrix/MatrixAdd/MatrixAdd.h"
 #include "../../Globals/globals.h"
+#include "Operations/Matrix/MatrixProduct/MatrixMult.h"
 
 void executeJobHandler(jobType_t jobType, char *params) {
     char *result;
@@ -37,6 +38,12 @@ void executeJobHandler(jobType_t jobType, char *params) {
         case MATRIXADD: {
             char *additionalParams = listenForData(NULL);
             result = computeMatrixAdd(params, additionalParams);
+            free(additionalParams);
+            break;
+        }
+        case MATRIXMULT: {
+            char *additionalParams = listenForData(NULL);
+            result = computeMatrixMult(params, additionalParams);
             free(additionalParams);
             break;
         }
