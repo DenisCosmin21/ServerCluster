@@ -12,6 +12,8 @@
 #include "Commands/CommandDispatcher.h"
 #include "Commands/CommandReader.h"
 #include "../Logger/Logger.h"
+#include "../Config/config.h"
+#include "Operations/Anagrams/Anagrams.h"
 
 static void initAvailableWorkers(void) {
     queue_init(&availableWorkers);
@@ -69,10 +71,13 @@ static void clearResponseFiles(void) {
 }
 
 void initializeDispatcher(HANDLE *threads) {
+    QueryPerformanceFrequency(&frequency);
+
     initLogger();
 
     clearResponseFiles();
 
+#if MODE == PARALLEL
     queue_init(&jobQueue);
     queue_init(&responseQueue);
     initAvailableWorkers();
@@ -87,10 +92,12 @@ void initializeDispatcher(HANDLE *threads) {
     InitializeCriticalSection(&responseAvailableMutex);
 
     // Windows Handles for threads
-
+#endif
 
     // CreateThreads
     threads[0] = CreateThread(NULL, 0, readCommands, NULL, 0, NULL);
+
+#if MODE == PARALLEL
     threads[1] = CreateThread(NULL, 0, dispatchCommands, NULL, 0, NULL);
     threads[2] = CreateThread(NULL, 0, getResponses, NULL, 0, NULL);
     threads[3] = CreateThread(NULL, 0, saveResponses, NULL, 0, NULL);
@@ -102,4 +109,11 @@ void initializeDispatcher(HANDLE *threads) {
             exit(-1);
         }
     }
+    #else
+    initAnagrams();
+    if(threads[0] == NULL) {
+        fprintf(stderr, "Error creating thread\n");
+        exit(-1);
+    }
+#endif
 }

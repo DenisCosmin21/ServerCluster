@@ -9,7 +9,7 @@
 #include "../../Jobs/JobReader.h"
 #include <stdio.h>
 #include <Windows.h>
-
+#include "../Config/config.h"
 #include "../../Logger/Logger.h"
 
 static void printQueueJob(void *job) {
@@ -17,6 +17,8 @@ static void printQueueJob(void *job) {
 }
 
 DWORD WINAPI readCommands(LPVOID lpParam) {
+    QueryPerformanceCounter(&start);
+
     FILE *commandFile = fopen("Resources\\commands.txt", "r");
 
     char log[1024];
@@ -36,6 +38,7 @@ DWORD WINAPI readCommands(LPVOID lpParam) {
         readJobHandler(job);
     }
 
+#if MODE == PARALLEL
     EnterCriticalSection(&commandAvailableMutex);
 #ifdef DEBUG
     printf("Locking commandAvailableMutex in readCommands\n");
@@ -47,7 +50,12 @@ DWORD WINAPI readCommands(LPVOID lpParam) {
     fflush(stdout);
     #endif
     LeaveCriticalSection(&commandAvailableMutex);
+#else
+    QueryPerformanceCounter(&end);
 
+    double interval = (double)(end.QuadPart - start.QuadPart) / (double)frequency.QuadPart;
+    printf("Execution time: %lf\n", interval);
+#endif
     fclose(commandFile);
 
     sprintf(log, "Finished reading commands\n");

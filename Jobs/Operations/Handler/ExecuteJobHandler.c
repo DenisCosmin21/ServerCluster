@@ -58,3 +58,39 @@ void executeJobHandler(jobType_t jobType, char *params) {
 
     free(result);
 }
+
+char *executeSerialJobHandler(jobType_t jobType, char *params, char *additionalParams) {
+    char *result;
+
+    switch (jobType) {
+        case PRIMES: {
+            ssize_t maxPrime = strtol(params, NULL, 10);
+            result = computePrimes(maxPrime);
+            break;
+        }
+        case PRIMEDIVISORS: {
+            ssize_t number = strtol(params, NULL, 10);
+            result = computePrimeDivizorsCount(number);
+            break;
+        }
+        case ANAGRAMS: {
+            result = computeAnagrams(params);
+            break;
+        }
+        case MATRIXADD: {
+            result = computeMatrixAdd(params, additionalParams);
+            break;
+        }
+        case MATRIXMULT: {
+            result = computeMatrixMult(params, additionalParams);
+            break;
+        }
+        default: {
+            result = malloc(20 * sizeof(char));
+            strcpy(result, "Job not supported");
+            break;
+        }
+    }
+
+    return result;
+}

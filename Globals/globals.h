@@ -9,6 +9,9 @@
 #include <Windows.h>
 #include "Primes.h"
 
+#define SERIAL 0
+#define PARALLEL 1
+
 extern int * workers;
 
 extern job_t *assignedJobs;
@@ -39,4 +42,6 @@ extern int rank;
 extern int chunksReachedPerJob[1024];
 
 extern const char resourcesDirectory[];
+
+extern LARGE_INTEGER start, end, frequency;
 #endif //GLOBALS_H

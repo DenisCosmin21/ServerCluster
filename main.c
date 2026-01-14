@@ -1,20 +1,26 @@
-#include <stdio.h>
+#include <Job.h>
 #include <mpi.h>
+#include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #include "Dispatcher/JobDispatcher.h"
 #include "Worker/Worker.h"
+#include "Globals/globals.h"
+#include "Config/config.h"
+#include <windows.h>
 
 int main(void) {
-    int rank = 0;
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+
+    QueryPerformanceCounter(&start);
+
+#if MODE == PARALLEL
     int provided = 0;
-    int version = 0;
-    int subversion = 0;
 
     MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &provided);
 
     if (provided < MPI_THREAD_MULTIPLE) {
-        // Note: Some versions of MS-MPI only support up to MPI_THREAD_SERIALIZED
         exit(-1);
     }
 
@@ -25,9 +31,19 @@ int main(void) {
     else
         runWorker();
 
-    printf("Finished program\n");
-    fflush(stdout);
+    QueryPerformanceCounter(&end);
+
+    if(rank == 0) {
+
+        fflush(stdout);
+    }
     MPI_Finalize();
 
+#else
+    runDispatcher();
+    #endif
+
+
     return 0;
+
 }

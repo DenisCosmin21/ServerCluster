@@ -20,7 +20,9 @@ void initLogger(void) {
         exit(-1);
     }
 
+#if MODE == PARALLEL
     InitializeCriticalSection(&logMutex);
+#endif
 }
 
 static void generateTimeStamp(void) {
@@ -41,15 +43,21 @@ void logData(const char* data) {
     if (logFile == NULL) {
         return;
     }
+#if MODE == PARALLEL
 
     EnterCriticalSection(&logMutex);
+
+#endif
 
     generateTimeStamp();
 
     fprintf(logFile, "%s\n", data);
 
+#if MODE == PARALLEL
+
     LeaveCriticalSection(&logMutex);
 
+#endif
     fflush(logFile);
 }
 

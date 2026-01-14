@@ -3,13 +3,13 @@
 //
 
 #include "MatrixHandler.h"
-
 #include "../Handler/ReadJobHandler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../../../Config/config.h"
 #include "../../Job.h"
+#include "SerialHandler.h"
 
 static void readMatrixChunk(FILE *file, char *buffer, size_t chunkSize, size_t matrixSize) {
     size_t charsRead = 0;
@@ -59,6 +59,7 @@ void matrixMultHandler(job_t job) {
 
     char *firstMatrix = NULL;
 
+#if MODE == PARALLEL
     if(matrixSize < MATRIX_SIZE_THRESHOLD) {
         firstMatrix = malloc(matrixSize * sizeof(char) * 9 * matrixSize);
 
@@ -118,7 +119,21 @@ void matrixMultHandler(job_t job) {
             chunk++;
         }
     }
+#else
+    firstMatrix = malloc(matrixSize * sizeof(char) * 9 * matrixSize);
 
+    if (firstMatrix == NULL) {
+        perror("malloc");
+        exit(-1);
+    }
+
+    readMatrixChunk(file1, firstMatrix, matrixSize, matrixSize);
+
+    job_t jobToAdd = newJob(MATRIXMULT, firstMatrix, secondMatrix, job->jobId, 0);
+
+    executeJob(jobToAdd);
+
+#endif
 
     fclose(file1);
     destructJob(job);
@@ -152,6 +167,7 @@ void matrixAddHandler(job_t job) {
 
     matrixSize = getMatrixSize(file1);
 
+#if MODE == PARALLEL
     if(matrixSize < MATRIX_SIZE_THRESHOLD) {
         matrixSize = getMatrixSize(file2);
 
@@ -234,6 +250,34 @@ void matrixAddHandler(job_t job) {
     }
 
     destructJob(job);
+
+#else
+    matrixSize = getMatrixSize(file2);
+
+    firstMatrix = malloc(matrixSize * sizeof(char) * 9 * matrixSize);
+
+    if (firstMatrix == NULL) {
+        perror("malloc");
+        exit(-1);
+    }
+
+    readMatrixChunk(file1, firstMatrix, matrixSize, matrixSize);
+
+    secondMatrix = malloc(matrixSize * sizeof(char) * 9 * matrixSize);
+
+    if (secondMatrix == NULL) {
+        perror("malloc");
+        exit(-1);
+    }
+
+    readMatrixChunk(file2, secondMatrix, matrixSize, matrixSize);
+
+    job_t jobToAdd = newJob(MATRIXADD, firstMatrix, secondMatrix, job->jobId, 0);
+
+    executeJob(jobToAdd);
+
+    destructJob(job);
+#endif
 }
 
 

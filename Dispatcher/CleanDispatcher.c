@@ -9,6 +9,7 @@
 #include "../Jobs/Job.h"
 #include "../Globals/globals.h"
 #include "../Logger/Logger.h"
+#include "../Config/config.h"
 
 static void finishWorkers(void) {
     char test = 0;
@@ -21,8 +22,15 @@ static void finishWorkers(void) {
 }
 
 void cleanDispatcher(HANDLE *threads) {
+#if MODE == PARALLEL
     // Wait for all threads to finish (Equivalent to pthread_join)
     WaitForMultipleObjects(4, threads, TRUE, INFINITE);
+
+    QueryPerformanceCounter(&end);
+
+    double interval = (double)(end.QuadPart - start.QuadPart) / (double)frequency.QuadPart;
+    printf("Execution time: %lf\n", interval);
+    fflush(stdout);
 
     // Close handles to release resources
     for(int i = 0; i < 4; i++) {
@@ -34,6 +42,11 @@ void cleanDispatcher(HANDLE *threads) {
     DeleteCriticalSection(&responseAvailableMutex);
 
     finishWorkers();
+#else
+    WaitForMultipleObjects(1, threads, TRUE, INFINITE);
+
+    CloseHandle(threads[0]);
+#endif
 
     freeLogger();
 }

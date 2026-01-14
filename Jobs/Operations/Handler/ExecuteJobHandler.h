@@ -8,4 +8,5 @@
 
 void executeJobHandler(jobType_t jobType, char *params);
 
+char *executeSerialJobHandler(jobType_t jobType, char *params, char *additionalParams);
 #endif //EXECUTEJOBHANDLER_H

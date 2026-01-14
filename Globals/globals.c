@@ -33,3 +33,5 @@ int rank = 0;
 int chunksReachedPerJob[1024];
 
 const char resourcesDirectory[] = "Resources/Responses";
+
+LARGE_INTEGER start, end, frequency;
