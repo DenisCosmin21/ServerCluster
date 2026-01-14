@@ -6,7 +6,7 @@
 #define MATRIXHANDLER_H
 #include "../../Job.h"
 
-void MatrixMultHandler(job_t job);
+void matrixMultHandler(job_t job);
 
 void matrixAddHandler(job_t job);
 #endif //MATRIXHANDLER_H
