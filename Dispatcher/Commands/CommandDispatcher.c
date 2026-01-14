@@ -108,13 +108,34 @@ DWORD WINAPI dispatchCommands(LPVOID lpParam) {
 
         logData(log);
 
-        sprintf(log, "Parameters : %s\n", job->params);
+        char *logBuffer = NULL;
 
-        logData(log);
+        if(strlen(job->params) > 2048) {
+            logBuffer = malloc(strlen(job->params) + 30);
+            *logBuffer = 0;
+            sprintf(logBuffer, "Parameters : %s\n", job->params);
+            logData(logBuffer);
+        }
+        else {
+            sprintf(log, "Parameters : %s\n", job->params);
+
+            logData(log);
+        }
 
         if(job->additionalParam != NULL) {
-            sprintf(log, "Additional parameters : %s\n", job->additionalParam);
-            logData(log);
+            if(strlen(job->additionalParam) > 2048) {
+                if(strlen(job->additionalParam) > strlen(logBuffer))
+                    logBuffer = realloc(logBuffer, strlen(job->additionalParam) + 30);
+
+                sprintf(logBuffer, "Additional parameters : %s\n", job->additionalParam);
+                logData(logBuffer);
+
+                free(logBuffer);
+            }
+            else {
+                sprintf(log, "Additional parameters : %s\n", job->additionalParam);
+                logData(log);
+            }
         }
 
         MPI_Send(job->params, strlen(job->params) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);

@@ -60,7 +60,7 @@ void matrixMultHandler(job_t job) {
     char *firstMatrix = NULL;
 
 #if MODE == PARALLEL
-    if(matrixSize < MATRIX_SIZE_THRESHOLD) {
+    if(matrixSize <= MATRIX_SIZE_THRESHOLD) {
         firstMatrix = malloc(matrixSize * sizeof(char) * 9 * matrixSize);
 
         if (firstMatrix == NULL) {
@@ -77,13 +77,21 @@ void matrixMultHandler(job_t job) {
     else {
         size_t chunk = 1;
 
-        size_t chunkSize = matrixSize / MAX_JOBS_PER_JOB;
-        size_t lastChunk = matrixSize % MAX_JOBS_PER_JOB + chunkSize;
+        size_t jobsCreated = matrixSize / MATRIX_SIZE_THRESHOLD;
+
+        size_t chunkSize = 0;
+        size_t lastChunk = 0;
+
+        if(jobsCreated > MAX_JOBS_PER_JOB)
+            jobsCreated = MAX_JOBS_PER_JOB;
+
+        chunkSize = matrixSize / MAX_JOBS_PER_JOB;
+        lastChunk = matrixSize % MAX_JOBS_PER_JOB + chunkSize;
 
         job_t jobToAdd = NULL;
 
-        while(chunk <= MAX_JOBS_PER_JOB) {
-            if(chunk == MAX_JOBS_PER_JOB) {
+        while(chunk <= jobsCreated) {
+            if(chunk == jobsCreated) {
                 firstMatrix = malloc(lastChunk * sizeof(char) * 9 * matrixSize);
 
                 if(firstMatrix == NULL) {
@@ -200,14 +208,22 @@ void matrixAddHandler(job_t job) {
 
     size_t chunk = 1;
 
-    size_t chunkSize = matrixSize / MAX_JOBS_PER_JOB;
-    size_t lastChunk = matrixSize % MAX_JOBS_PER_JOB + chunkSize;
+    size_t jobsCreated = matrixSize / MATRIX_SIZE_THRESHOLD;
+
+    size_t chunkSize = 0;
+    size_t lastChunk = 0;
+
+    if(jobsCreated > MAX_JOBS_PER_JOB)
+        jobsCreated = MAX_JOBS_PER_JOB;
+
+    chunkSize = matrixSize / jobsCreated;
+    lastChunk = matrixSize % jobsCreated + chunkSize;
 
     matrixSize = getMatrixSize(file2);
 
-    while(chunk <= MAX_JOBS_PER_JOB) {
+    while(chunk <= jobsCreated) {
         //If we are on the last job created we should span it on all the lines
-        if(chunk == MAX_JOBS_PER_JOB) {
+        if(chunk == jobsCreated) {
             firstMatrix = malloc(chunkSize * sizeof(char) * 9 * matrixSize);
 
             if(firstMatrix == NULL) {
