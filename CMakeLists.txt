@@ -37,6 +37,8 @@ add_executable(ServerCluster main.c
         Jobs/Operations/Handler/MatrixHandler.c
         Jobs/Operations/Matrix/MatrixProduct/MatrixMult.c
         Jobs/Operations/Matrix/MatrixProduct/MatrixMult.h
+        Logger/Logger.c
+        Logger/Logger.h
 )
 
 target_include_directories(ServerCluster PRIVATE
