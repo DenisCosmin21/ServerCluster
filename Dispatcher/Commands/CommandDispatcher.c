@@ -110,7 +110,7 @@ DWORD WINAPI dispatchCommands(LPVOID lpParam) {
 
         char *logBuffer = NULL;
 
-        if(strlen(job->params) > 2048) {
+        if(strlen(job->params) >= 2048) {
             logBuffer = malloc(strlen(job->params) + 30);
             *logBuffer = 0;
             sprintf(logBuffer, "Parameters : %s\n", job->params);
@@ -123,9 +123,11 @@ DWORD WINAPI dispatchCommands(LPVOID lpParam) {
         }
 
         if(job->additionalParam != NULL) {
-            if(strlen(job->additionalParam) > 2048) {
-                if(strlen(job->additionalParam) > strlen(logBuffer))
+            if(strlen(job->additionalParam) >= 2048) {
+                if(logBuffer != NULL && strlen(job->additionalParam) > strlen(logBuffer))
                     logBuffer = realloc(logBuffer, strlen(job->additionalParam) + 30);
+                else
+                    logBuffer = malloc(strlen(job->additionalParam) + 30);
 
                 sprintf(logBuffer, "Additional parameters : %s\n", job->additionalParam);
                 logData(logBuffer);
