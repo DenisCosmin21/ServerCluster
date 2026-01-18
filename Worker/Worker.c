@@ -14,10 +14,6 @@
 #include "Operations/Anagrams/Anagrams.h"
 #include "../../Globals/globals.h"
 
-static void cleanupWorker(void) {
-    cleanupPrimes();
-}
-
 char *listenForData(MPI_Status *status) {
     if(status == NULL) {
         MPI_Status localStatus;
@@ -27,15 +23,6 @@ char *listenForData(MPI_Status *status) {
     int size = 0;
 
     MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, status);
-
-    //Finnish the work if the stop work tag is sent
-    if(status->MPI_TAG == STOP_WORKING) {
-        cleanupWorker();
-        char finishBuff;
-        MPI_Recv(&finishBuff, 1, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, status);
-
-        return NULL;
-    }
 
     MPI_Get_count(status, MPI_CHAR, &size);
 
@@ -52,16 +39,11 @@ char *listenForData(MPI_Status *status) {
 }
 
 void runWorker() {
-
-
     initAnagrams();
     while(1) {
         MPI_Status status;
 
         char *params = listenForData(&status);
-
-        if(params == NULL)
-            break;
 
         jobType_t jobType = status.MPI_TAG;
 

@@ -8,7 +8,8 @@
 #include <stdint.h>
 
 typedef enum {
-    WAIT = 2,
+    STOP = 1,
+    WAIT,
     PRIMES,
     PRIMEDIVISORS,
     ANAGRAMS,

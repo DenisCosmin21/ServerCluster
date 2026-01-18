@@ -17,7 +17,7 @@ static void finishWorkers(void) {
     for(int i = 0; i < totalWorkers - 1; i++) {
         printf("Finishing worker %d\n", workers[i]);
         fflush(stdout);
-        MPI_Send(&test, 1, MPI_CHAR, workers[i], STOP_WORKING, MPI_COMM_WORLD);
+        MPI_Send(&test, 1, MPI_CHAR, workers[i], STOP, MPI_COMM_WORLD);
     }
 }
 

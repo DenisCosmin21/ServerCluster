@@ -21,6 +21,12 @@ void executeJobHandler(jobType_t jobType, char *params) {
     char *result;
 
     switch (jobType) {
+        //Finnish the work if the stop work tag is sent
+        case STOP: {
+            cleanupWorker();
+            MPI_Finalize();
+            exit(EXIT_SUCCESS);
+        }
         case PRIMES: {
             ssize_t maxPrime = strtol(params, NULL, 10);
             result = computePrimes(maxPrime);
