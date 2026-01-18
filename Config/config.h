@@ -12,5 +12,5 @@
 #define MAX_JOBS_PER_JOB 8
 #define LOG_FILE "Resources/Logs/logs.txt"
 #define MODE PARALLEL
-
+#define IMAGE_SIZE_THRESHOLD 256
 #endif //CONFIG_H

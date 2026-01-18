@@ -14,6 +14,7 @@
 #include "../Logger/Logger.h"
 #include "../Config/config.h"
 #include "Operations/Anagrams/Anagrams.h"
+#include <omp.h>
 
 static void initAvailableWorkers(void) {
     queue_init(&availableWorkers);
@@ -71,6 +72,7 @@ static void clearResponseFiles(void) {
 }
 
 void initializeDispatcher(HANDLE *threads) {
+    omp_set_num_threads(THREAD_COUNT);
     QueryPerformanceFrequency(&frequency);
 
     initLogger();

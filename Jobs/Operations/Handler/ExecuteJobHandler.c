@@ -15,7 +15,11 @@
 #include "Operations/Anagrams/Anagrams.h"
 #include "Operations/Matrix/MatrixAdd/MatrixAdd.h"
 #include "../../Globals/globals.h"
+#include "Operations/Convolution/ComputeConvolution.h"
 #include "Operations/Matrix/MatrixProduct/MatrixMult.h"
+static void cleanupWorker(void) {
+    cleanupPrimes();
+}
 
 void executeJobHandler(jobType_t jobType, char *params) {
     char *result;

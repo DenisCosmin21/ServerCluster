@@ -87,11 +87,9 @@ char *computeAnagrams(char *input) {
 
     size_t global_index = 0;
 
-    // 4. Parallel Generation
-    // We parallelize the first letter choice to distribute the work
     #pragma omp parallel for schedule(dynamic) default(none) shared(n, input, global_index, buffer)
         for (int i = 0; i < n; i++) {
-            // Check for duplicates at the top level
+
             int is_dup = 0;
             for (int j = 0; j < i; j++) {
                 if (input[j] == input[i]) {
