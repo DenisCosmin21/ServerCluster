@@ -41,6 +41,12 @@ add_executable(ServerCluster main.c
         Logger/Logger.h
         Jobs/Operations/Handler/SerialHandler.c
         Jobs/Operations/Handler/SerialHandler.h
+        Jobs/Operations/Handler/ConvolutionHandler.c
+        Jobs/Operations/Handler/ConvolutionHandler.h
+        Jobs/Operations/Convolution/ComputeConvolution.c
+        Jobs/Operations/Convolution/ComputeConvolution.h
+        Jobs/Operations/Convolution/Kernels.c
+        Jobs/Operations/Convolution/Kernels.h
 )
 
 target_include_directories(ServerCluster PRIVATE
