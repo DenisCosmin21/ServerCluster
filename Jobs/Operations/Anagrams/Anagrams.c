@@ -66,13 +66,11 @@ static void generateRecursive(char *currentStr, int left, int right, char *buffe
 char *computeAnagrams(char *input) {
     size_t n = strlen(input);
 
-    // 1. Pre-process: Lowercase and Sort
     for(size_t i = 0; i < n; i++) {
         if(input[i] >= 'A' && input[i] <= 'Z') input[i] += 32;
     }
     qsort(input, n, sizeof(char), compare);
 
-    // 2. Calculate total permutations (Your logic)
     size_t divisor = 1;
     size_t letterCount = 0;
     for(size_t i = 0; i <= n; i++) {
@@ -84,8 +82,6 @@ char *computeAnagrams(char *input) {
     }
     size_t totalPermutations = factorial(n) / divisor;
 
-    // 3. Allocate Buffer
-    // Each entry is (n characters + 1 newline). Last byte is \0 for the whole string.
     char *buffer = malloc(totalPermutations * (n + 1) + 1);
     if (!buffer) return NULL;
 
