@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "../Globals/globals.h"
 #include <Windows.h>
-
+#include "../Jobs/Operations/Handler/ConvolutionHandler.h"
 #include "../Logger/Logger.h"
 
 static int availableJobs(void) {
@@ -284,26 +284,33 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
         sprintf(log, "Saving Job with Id = %llu; and chunk = %llu\n", response->jobId, response->chunkId);
 
         logData(log);
+
 #ifdef DEBUG
-        printf("Writing job response\n");
-        fflush(stdout);
+            printf("Writing job response\n");
+            fflush(stdout);
 #endif
 
         char fileName[256];
 
-        sprintf(fileName, "%s%llu.txt", baseFileName, response->jobId);
-
-        FILE *responseFile = fopen(fileName, "a");
-
-        if(responseFile == NULL) {
-            perror("Error opening response file\n");
-            exit(-1);
+        if(response->jobType == CONVOLUTION) {
+            sprintf(fileName, "%s%llu.bmp", baseFileName, response->jobId);
+            saveConvolution(fileName, response->params, response->additionalParam);
         }
+        else {
+            sprintf(fileName, "%s%llu.txt", baseFileName, response->jobId);
 
-        fprintf(responseFile, "%s\n", response->params);
-        fflush(responseFile);
+            FILE *responseFile = fopen(fileName, "a");
 
-        fclose(responseFile);
+            if(responseFile == NULL) {
+                perror("Error opening response file\n");
+                exit(-1);
+            }
+
+            fprintf(responseFile, "%s\n", response->params);
+            fflush(responseFile);
+
+            fclose(responseFile);
+        }
 
         destructJob(response);
     }

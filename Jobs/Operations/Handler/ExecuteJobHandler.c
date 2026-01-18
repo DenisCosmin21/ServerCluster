@@ -19,6 +19,7 @@
 
 void executeJobHandler(jobType_t jobType, char *params) {
     char *result;
+    size_t responseLength = 0;
 
     switch (jobType) {
         //Finnish the work if the stop work tag is sent
@@ -53,6 +54,14 @@ void executeJobHandler(jobType_t jobType, char *params) {
             free(additionalParams);
             break;
         }
+        case CONVOLUTION: {
+            char *additionalParams = listenForData(NULL);
+            imageHeader_t headerInfo;
+            result = computeConvolution(params, additionalParams, &headerInfo);
+            responseLength = headerInfo.height * headerInfo.width * 3;
+            free(additionalParams);
+            break;
+        }
         default: {
             result = malloc(20 * sizeof(char));
             strcpy(result, "Job not supported");
@@ -60,8 +69,10 @@ void executeJobHandler(jobType_t jobType, char *params) {
         }
     }
 
-    MPI_Send(result, strlen(result) + 1, MPI_CHAR, 0, jobType, MPI_COMM_WORLD);
+    if(jobType != CONVOLUTION)
+        responseLength = strlen(result) + 1;
 
+    MPI_Send(result, responseLength, MPI_CHAR, 0, jobType, MPI_COMM_WORLD);
     free(result);
 }
 

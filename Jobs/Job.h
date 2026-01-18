@@ -4,7 +4,6 @@
 
 #ifndef JOB_H
 #define JOB_H
-#define STOP_WORKING 1
 #include <stdint.h>
 
 typedef enum {
@@ -14,7 +13,8 @@ typedef enum {
     PRIMEDIVISORS,
     ANAGRAMS,
     MATRIXADD,
-    MATRIXMULT
+    MATRIXMULT,
+    CONVOLUTION
 } jobType_t;
 
 struct job{

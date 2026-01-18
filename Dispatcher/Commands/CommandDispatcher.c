@@ -10,6 +10,8 @@
 #include "../../Queue/DoubleLinkedListQueue.h"
 #include "../../Jobs/Job.h"
 #include "../../Logger/Logger.h"
+#include "Operations/Convolution/ComputeConvolution.h"
+
 static int availableCommands(void) {
 
     EnterCriticalSection(&commandAvailableMutex);
@@ -140,7 +142,13 @@ DWORD WINAPI dispatchCommands(LPVOID lpParam) {
             }
         }
 
-        MPI_Send(job->params, strlen(job->params) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);
+        if(job->jobType == CONVOLUTION) {
+            imageHeader_t headerInfo = getHeaderInfo(job->additionalParam);
+
+            MPI_Send(job->params, headerInfo.paddedHeight * headerInfo.paddedWidth * 3, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);
+        }
+        else
+            MPI_Send(job->params, strlen(job->params) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);
 
         if(job->additionalParam != NULL)
             MPI_Send(job->additionalParam, strlen(job->additionalParam) + 1, MPI_CHAR, worker, job->jobType, MPI_COMM_WORLD);

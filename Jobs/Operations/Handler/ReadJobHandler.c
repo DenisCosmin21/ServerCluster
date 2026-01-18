@@ -4,9 +4,13 @@
 
 #include "ReadJobHandler.h"
 
+#include <stdio.h>
+
 #include "../Jobs/Operations/Handler/MatrixHandler.h"
 #include "../../Job.h"
 #include <Windows.h>
+
+#include "ConvolutionHandler.h"
 #include "../../../Queue/DoubleLinkedListQueue.h"
 #include "../../../Globals/globals.h"
 #include "../Sleep/WaitJob.h"
@@ -30,8 +34,6 @@ void enqueueJob(job_t job) {
     #endif
 
     LeaveCriticalSection(&commandAvailableMutex);
-
-
 }
 
 void readJobHandler(job_t job) {
@@ -47,6 +49,10 @@ void readJobHandler(job_t job) {
         }
         case MATRIXMULT : {
             matrixMultHandler(job);
+            return;
+        }
+        case CONVOLUTION : {
+            convolutionHandler(job);
             return;
         }
 

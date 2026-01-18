@@ -41,6 +41,8 @@ jobType_t getJobTypeFromCommand(const char *command) {
 
     if(strcmp(command, "MATRIXMULT") == 0)
         return MATRIXMULT;
+    if(strcmp(command, "CONVOLUTION" ) == 0)
+        return CONVOLUTION;
 
     return WAIT;
 }
