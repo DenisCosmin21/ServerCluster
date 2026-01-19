@@ -63,6 +63,20 @@ static void generateGaussianBlurKernel(kernel_t *kernel) {
     kernel->values[2][2] = (float)1/16;
 }
 
+static void generateSimpleKernel(kernel_t *kernel) {
+    kernel->values = allocateKernel(kernel->size);
+
+    kernel->values[0][0] = 0;
+    kernel->values[0][1] = 0;
+    kernel->values[0][2] = 0;
+    kernel->values[1][0] = 0;
+    kernel->values[1][1] = 1;
+    kernel->values[1][2] = 0;
+    kernel->values[2][0] = 0;
+    kernel->values[2][1] = 0;
+    kernel->values[2][2] = 0;
+}
+
 float **allocateKernel(const size_t kernelSize) {
     float **kernel = malloc(kernelSize * sizeof(float *));
 
@@ -128,5 +142,10 @@ kernel_t getKernel(char *type) {
         return kernel;
     }
 
-    return (kernel_t){0};
+    kernel.size = 3;
+    kernel.stride = 1;
+
+    generateSimpleKernel(&kernel);
+
+    return kernel;
 }

@@ -20,7 +20,8 @@ static size_t getKernelSize(const char *convType) {
         return 3;
     if(strcmp(convType, "gaussian-blur") == 0)
         return 3;
-    return 0;
+
+    return 3;
 }
 
 static size_t getPaddingSize(const char *convType) {
@@ -100,10 +101,8 @@ static void parallelConvolutionHandler(FILE *file, job_t job, const imageHeader_
 
         if(chunk == jobsCreated) {
             buffer = malloc(headerInfo->paddedWidth * lastChunk * 3); //We use a continous char buffer
-            sprintf(jobHeader, "%llu %llu %llu %llu %s", headerInfo->width, lastChunk, headerInfo->paddedWidth, lastChunk, headerInfo->type);
-            startRow += lastChunk;
-            lastRow += lastChunk;
             sprintf(jobHeader, "%llu %llu %llu %llu %llu %llu %s", headerInfo->width, lastChunk, headerInfo->paddedWidth, lastChunk, headerInfo->width, headerInfo->height, headerInfo->type);
+            startRow -= lastChunk;
         }
         else {
             buffer = malloc(headerInfo->paddedWidth * chunkSize * 3);
