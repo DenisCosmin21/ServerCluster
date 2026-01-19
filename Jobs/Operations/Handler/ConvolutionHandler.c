@@ -81,13 +81,13 @@ static void parallelConvolutionHandler(FILE *file, job_t job, const imageHeader_
 
     size_t lastChunk = headerInfo->paddedHeight % jobsCreated + chunkSize;
 
-    size_t startRow = sidePadding;
+    size_t startRow = headerInfo->paddedHeight;
 
-    size_t lastRow = 0;
+    size_t lastRow = headerInfo->paddedHeight;
 
     char *buffer = NULL;
 
-    size_t chunk = 1;
+    size_t chunk = 0;
 
     while(chunk <= jobsCreated) {
         char *jobHeader = malloc(strlen(headerInfo->type) + 40 + 40); //Give size for widht and height
@@ -115,6 +115,11 @@ static void parallelConvolutionHandler(FILE *file, job_t job, const imageHeader_
         }
 
         readRows(file, buffer, startRow, lastRow, headerInfo);
+
+        if(chunk == jobsCreated)
+            lastRow -= lastChunk;
+        else
+            lastRow -= chunkSize;
 
         job_t jobToAdd = newJob(CONVOLUTION, buffer, jobHeader, job->jobId, chunk);
 
@@ -220,24 +225,28 @@ void convolutionHandler(job_t job) {
     destructJob(job);
 }
 
-void saveConvolution(const char *filename, const char *data,  const char *params)
+void saveConvolution(const char *filename, const char *data, const char *params)
 {
-    FILE *f = fopen(filename, "rb+");
+    // 1. Open in rb+ to allow reading the header AND writing at specific offsets
+    FILE *f = fopen(filename, "rb");
     int headerExists = 1;
 
     if (!f) {
-        f = fopen(filename, "wb+");
+        f = fopen(filename, "ab");
         headerExists = 0;
         if (!f) {
             perror("Error: Could not open/create file");
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
     }
+    else {
+        fclose(f);
+        f = fopen(filename, "ab");
+    }
 
     imageHeader_t headerInfo = getHeaderInfo(params);
 
-
-    size_t row_padded = (headerInfo.width * 3 + 3) & (~3);
+    size_t row_padded = (headerInfo.totalWidth * 3 + 3) & (~3);
 
     unsigned char header[54] = {
         'B', 'M',    // Signature
@@ -257,52 +266,36 @@ void saveConvolution(const char *filename, const char *data,  const char *params
         0, 0, 0, 0   // Important colors
     };
 
-    size_t finalHeight = headerInfo.height;
+    *(int *)&header[2] = 54 + (int)row_padded * (int)headerInfo.totalHeight;
+    *(int *)&header[18] = (int)headerInfo.totalWidth;
+    *(int *)&header[22] = (int)headerInfo.totalHeight;
 
-    if (headerExists) {
-        if (fread(header, 1, 54, f) == 54) {
-            int existingHeight = *(int *)&header[22];
-            finalHeight += existingHeight;
-        } else {
-            headerExists = 0;
-        }
+    if(!headerExists) {
+        fwrite(header, sizeof(unsigned char), 54, f);
     }
-
-    size_t fileSize = 54 + row_padded * finalHeight;
-
-    if (!headerExists) {
-        *(int *)&header[18] = (int)headerInfo.width;
-    }
-
-    *(int *)&header[2] = (int)fileSize;
-    *(int *)&header[22] = (int)finalHeight;
-
-    fseek(f, 0, SEEK_SET);
-
-    fwrite(header, sizeof(unsigned char), 54, f);
-
-    fseek(f, 0, SEEK_END);
 
     unsigned char *row = (unsigned char *)calloc(1, row_padded);
+
     if (!row)
     {
-        perror( "Error: Memory allocation failed\n");
+        fprintf(stderr, "Error: Memory allocation failed\n");
         fclose(f);
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
+
     for (int y = 0; y < headerInfo.height; y++)
     {
-        for (int x = 0; x < headerInfo.width; x++)
+        for (int x = 0; x < (int)headerInfo.width; x++)
         {
             int src_idx = ((headerInfo.height - 1 - y) * headerInfo.width + x) * 3;
-
             row[x * 3 + 0] = data[src_idx + 0];
             row[x * 3 + 1] = data[src_idx + 1];
             row[x * 3 + 2] = data[src_idx + 2];
         }
-        fwrite(row, sizeof(unsigned char), row_padded, f);
+        fwrite(row, 1, row_padded, f);
     }
+
 
     free(row);
     fflush(f);
