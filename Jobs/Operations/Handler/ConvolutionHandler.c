@@ -57,7 +57,6 @@ static void readRows(FILE *file, char *buffer, const size_t startRow,const size_
         {
             size_t target_pos = ((lastRow - 1 - y) * headerInfo->width + x) * 3;
             size_t source_pos = x * 3;
-
             buffer[target_pos] = row[source_pos];
             buffer[target_pos + 1] = row[source_pos + 1];
             buffer[target_pos + 2] = row[source_pos + 2];
@@ -145,7 +144,7 @@ static void serialConvolutionHandler(FILE *file, job_t job, const imageHeader_t 
 
     sprintf(jobHeader, "%llu %llu %llu %llu %llu %llu %s", headerInfo->width, headerInfo->height, headerInfo->paddedWidth, headerInfo->paddedHeight, headerInfo->width, headerInfo->height, headerInfo->type);
 
-    char *buffer = malloc((headerInfo->width + totalPadding * 2) * (headerInfo->height + totalPadding * 2) * 3); //We use a continous char buffer
+    char *buffer = malloc((headerInfo->paddedWidth) * (headerInfo->paddedHeight) * 3); //We use a continous char buffer
 
     if(buffer == NULL) {
         perror("Error allocating memory");
@@ -156,7 +155,7 @@ static void serialConvolutionHandler(FILE *file, job_t job, const imageHeader_t 
         memset(buffer, 0, headerInfo->width + totalPadding);
     }
 
-    readRows(file, buffer, sidePadding, headerInfo->width, headerInfo);
+    readRows(file, buffer, sidePadding, headerInfo->height, headerInfo);
 
     job_t jobToAdd = newJob(CONVOLUTION, buffer, jobHeader, job->jobId, 0);
 
