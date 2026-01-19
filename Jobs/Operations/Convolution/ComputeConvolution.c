@@ -22,6 +22,10 @@ imageHeader_t getHeaderInfo(const char *header) {
 
     headerInfo.paddedHeight = strtol(nextElemPointer, &nextElemPointer, 10);
 
+    headerInfo.totalWidth = strtol(nextElemPointer, &nextElemPointer, 10);
+
+    headerInfo.totalHeight = strtol(nextElemPointer, &nextElemPointer, 10);
+
     while(*nextElemPointer == ' ') {nextElemPointer++;}
     headerInfo.type = nextElemPointer;
 

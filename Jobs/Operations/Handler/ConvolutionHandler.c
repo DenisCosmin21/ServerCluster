@@ -103,12 +103,12 @@ static void parallelConvolutionHandler(FILE *file, job_t job, const imageHeader_
             sprintf(jobHeader, "%llu %llu %llu %llu %s", headerInfo->width, lastChunk, headerInfo->paddedWidth, lastChunk, headerInfo->type);
             startRow += lastChunk;
             lastRow += lastChunk;
+            sprintf(jobHeader, "%llu %llu %llu %llu %llu %llu %s", headerInfo->width, lastChunk, headerInfo->paddedWidth, lastChunk, headerInfo->width, headerInfo->height, headerInfo->type);
         }
         else {
             buffer = malloc(headerInfo->paddedWidth * chunkSize * 3);
-            sprintf(jobHeader, "%llu %llu %llu %llu %s", headerInfo->width, chunkSize, headerInfo->paddedWidth, chunkSize, headerInfo->type);
-            startRow += chunkSize * (chunk - 1);
-            lastRow += chunkSize;
+            sprintf(jobHeader, "%llu %llu %llu %llu %llu %llu %s", headerInfo->width, chunkSize, headerInfo->paddedWidth, chunkSize, headerInfo->width, headerInfo->height, headerInfo->type);
+            startRow -= chunkSize;
         }
 
         if(totalPadding > 0) {
@@ -139,7 +139,7 @@ static void serialConvolutionHandler(FILE *file, job_t job, const imageHeader_t 
 
     size_t sidePadding = totalPadding / 2;
 
-    sprintf(jobHeader, "%llu %llu %llu %llu %s", headerInfo->width, headerInfo->height, headerInfo->paddedWidth, headerInfo->paddedHeight, headerInfo->type);
+    sprintf(jobHeader, "%llu %llu %llu %llu %llu %llu %s", headerInfo->width, headerInfo->height, headerInfo->paddedWidth, headerInfo->paddedHeight, headerInfo->width, headerInfo->height, headerInfo->type);
 
     char *buffer = malloc((headerInfo->width + totalPadding * 2) * (headerInfo->height + totalPadding * 2) * 3); //We use a continous char buffer
 

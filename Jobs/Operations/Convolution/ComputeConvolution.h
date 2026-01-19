@@ -12,6 +12,8 @@ typedef struct imageHeader {
     size_t height;
     size_t paddedWidth;
     size_t paddedHeight;
+    size_t totalWidth;
+    size_t totalHeight;
     char *type;
 }imageHeader_t;
 
