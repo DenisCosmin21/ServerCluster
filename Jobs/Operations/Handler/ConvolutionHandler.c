@@ -19,7 +19,7 @@ static size_t getKernelSize(const char *convType) {
     if(strcmp(convType, "box-blur") == 0)
         return 3;
     if(strcmp(convType, "gaussian-blur") == 0)
-        return 3;
+        return 5;
 
     return 3;
 }

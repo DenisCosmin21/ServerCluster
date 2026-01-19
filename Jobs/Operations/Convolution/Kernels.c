@@ -54,15 +54,39 @@ static void generateBoxBlurKernel(kernel_t *kernel) {
 static void generateGaussianBlurKernel(kernel_t *kernel) {
     kernel->values = allocateKernel(kernel->size);
 
-    kernel->values[0][0] = (float)1/16;
-    kernel->values[0][1] = (float)2/16;
-    kernel->values[0][2] = (float)1/16;
-    kernel->values[1][0] = (float)2/16;
-    kernel->values[1][1] = (float)4/16;
-    kernel->values[1][2] = (float)2/16;
-    kernel->values[2][0] = (float)1/16;
-    kernel->values[2][1] = (float)2/16;
-    kernel->values[2][2] = (float)1/16;
+    kernel->values[0][0] = (float)1/256;
+    kernel->values[0][1] = (float)4/256;
+    kernel->values[0][2] = (float)6/256;
+    kernel->values[0][3] = (float)4/256;
+    kernel->values[0][4] = (float)1/256;
+
+    // Row 1
+    kernel->values[1][0] = (float)4/256;
+    kernel->values[1][1] = (float)16/256;
+    kernel->values[1][2] = (float)24/256;
+    kernel->values[1][3] = (float)16/256;
+    kernel->values[1][4] = (float)4/256;
+
+    // Row 2 (The Center)
+    kernel->values[2][0] = (float)6/256;
+    kernel->values[2][1] = (float)24/256;
+    kernel->values[2][2] = (float)36/256;
+    kernel->values[2][3] = (float)24/256;
+    kernel->values[2][4] = (float)6/256;
+
+    // Row 3
+    kernel->values[3][0] = (float)4/256;
+    kernel->values[3][1] = (float)16/256;
+    kernel->values[3][2] = (float)24/256;
+    kernel->values[3][3] = (float)16/256;
+    kernel->values[3][4] = (float)4/256;
+
+    // Row 4
+    kernel->values[4][0] = (float)1/256;
+    kernel->values[4][1] = (float)4/256;
+    kernel->values[4][2] = (float)6/256;
+    kernel->values[4][3] = (float)4/256;
+    kernel->values[4][4] = (float)1/256;
 }
 
 static void generateSimpleKernel(kernel_t *kernel) {
@@ -129,7 +153,7 @@ kernel_t getKernel(char *type) {
         kernel.size = 3;
         kernel.stride = 1;
 
-        generateSharpenKernel(&kernel);
+        generateHorizontalEdgeKernel(&kernel);
 
         return kernel;
     }
@@ -144,7 +168,7 @@ kernel_t getKernel(char *type) {
     }
 
     if(strcmp(type, "gaussian-blur") == 0) {
-        kernel.size = 3;
+        kernel.size = 5;
         kernel.stride = 1;
 
         generateGaussianBlurKernel(&kernel);
