@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../../Config/config.h"
+#include "../../../Worker/Worker.h"
 
 static size_t getMatrixSize(const char *matrix2, char **matrixAfterSize) {
     return strtol(matrix2, matrixAfterSize, 10);
@@ -63,7 +65,11 @@ static size_t computeMatrixProductAsLong(long** resultMatrix, char* matrix1, cha
 
             if(resultMatrix[posMatrix1] == NULL) {
                 perror("Error allocating resultMatrix");
+#if MODE == PARALLEL
+                exitFailedWorker();
+#else
                 exit(1);
+#endif
             }
 
             memset(resultMatrix[posMatrix1], 0, matrixSize * sizeof(long));
@@ -103,7 +109,11 @@ char *computeMatrixMult(char *matrix1, char *matrix2) {
 
     if(resultMatrix == NULL) {
         perror("Failed to allocate memory for resultMatrix");
+        #if MODE == PARALLEL
+        exitFailedWorker();
+#else
         exit(1);
+#endif
     }
 
     size_t columnSize = computeMatrixProductAsLong(resultMatrix, matrix1, matrix2, matrixSize);

@@ -7,6 +7,8 @@
 #include <stdio.h>
 
 #include "../../../Globals/globals.h"
+#include "../../../Config/config.h"
+#include "../../../Worker/Worker.h"
 
 char *computePrimeDivizorsCount(size_t n) {
 
@@ -14,7 +16,11 @@ char *computePrimeDivizorsCount(size_t n) {
 
     if(buffer == NULL) {
         perror("Eroare alocare");
+#if MODE == PARALLEL
+        exitFailedWorker();
+#else
         exit(1);
+#endif
     }
 
     size_t result = 0;

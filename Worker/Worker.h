@@ -10,4 +10,6 @@
 char *listenForData(MPI_Status *status);
 
 void runWorker(void);
+
+void exitFailedWorker(void);
 #endif //WORKER_H

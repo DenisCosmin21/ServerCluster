@@ -6,6 +6,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "../../../Config/config.h"
+#include "../../../Worker/Worker.h"
 
 static void generateSharpenKernel(kernel_t *kernel) {
     kernel->values = allocateKernel(kernel->size);
@@ -82,14 +84,22 @@ float **allocateKernel(const size_t kernelSize) {
 
     if(kernel == NULL) {
         perror("malloc");
-        exit(EXIT_FAILURE);
+#if MODE == PARALLEL
+        exitFailedWorker();
+#else
+        exit(1);
+#endif
     }
 
     for(size_t i = 0; i < kernelSize; i++) {
         kernel[i] = malloc(kernelSize * sizeof(float));
         if(kernel[i] == NULL) {
             perror("malloc");
-            exit(EXIT_FAILURE);
+#if MODE == PARALLEL
+            exitFailedWorker();
+#else
+            exit(1);
+#endif
         }
     }
 

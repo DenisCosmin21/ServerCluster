@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../../Config/config.h"
+#include "../../../Worker/Worker.h"
 
 char *computeMatrixAdd(char *matrix1, char *matrix2) {
     size_t totalBufferSize = strlen(matrix1) + strlen(matrix2) + 100;
@@ -15,7 +17,11 @@ char *computeMatrixAdd(char *matrix1, char *matrix2) {
 
     if (outputBuffer == NULL) {
         perror("malloc");
+#if MODE == PARALLEL
+        exitFailedWorker();
+#else
         exit(1);
+#endif
     }
 
     long elem1 = 0, elem2 = 0, result = 0;

@@ -8,6 +8,7 @@
 #include <string.h>
 #include "Kernels.h"
 #include "../../../Config/config.h"
+#include "../../../Worker/Worker.h"
 
 imageHeader_t getHeaderInfo(const char *header) {
     imageHeader_t headerInfo;
@@ -42,7 +43,11 @@ char *computeConvolution(char *data, char *params, imageHeader_t *headerInfoResu
 
     if(output == NULL) {
         perror("malloc");
-        exit(EXIT_FAILURE);
+#if MODE == PARALLEL
+        exitFailedWorker();
+#else
+        exit(1);
+#endif
     }
 
     int radius = kernel.size / 2;

@@ -7,7 +7,8 @@
 #include <stdint.h>
 
 typedef enum {
-    STOP = 1,
+    ERROR_JOB = 1,
+    STOP,
     WAIT,
     PRIMES,
     PRIMEDIVISORS,

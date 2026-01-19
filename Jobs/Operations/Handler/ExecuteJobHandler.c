@@ -17,7 +17,8 @@
 #include "../../Globals/globals.h"
 #include "Operations/Convolution/ComputeConvolution.h"
 #include "Operations/Matrix/MatrixProduct/MatrixMult.h"
-static void cleanupWorker(void) {
+
+void cleanupWorker(void) {
     cleanupPrimes();
 }
 

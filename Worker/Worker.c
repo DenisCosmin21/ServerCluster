@@ -14,6 +14,13 @@
 #include "Operations/Anagrams/Anagrams.h"
 #include "../../Globals/globals.h"
 
+void exitFailedWorker(void) {
+    char emptyMessage = '\0';
+    MPI_Send(&emptyMessage, 1, MPI_CHAR, 0, ERROR_JOB, MPI_COMM_WORLD);
+    cleanupWorker();
+    exit(1);
+}
+
 char *listenForData(MPI_Status *status) {
     if(status == NULL) {
         MPI_Status localStatus;

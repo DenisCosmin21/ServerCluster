@@ -4,6 +4,8 @@
 #include <string.h>
 #include "../../../Config/config.h"
 #include "../../../Globals/globals.h"
+#include "../../../Worker/Worker.h"
+
 #define PARALLEL_THRESHOLD 2000
 
 static void markPrimes(ssize_t currentPrime) {
@@ -49,7 +51,11 @@ char *computePrimes(size_t n) {
 
     if(buffer == NULL) {
         perror("Eroare alocare");
+#if MODE == PARALLEL
+        exitFailedWorker();
+#else
         exit(1);
+#endif
     }
 
     if (primes != NULL && (ssize_t)n < maxN) {
@@ -63,7 +69,11 @@ char *computePrimes(size_t n) {
     prime_t *newPrimes = realloc(primes, maxN * sizeof(prime_t));
     if (newPrimes == NULL) {
         perror("Eroare alocare realloc");
+#if MODE == PARALLEL
+        exitFailedWorker();
+#else
         exit(1);
+#endif
     }
     primes = newPrimes;
 

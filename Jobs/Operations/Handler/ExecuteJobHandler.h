@@ -9,4 +9,6 @@
 void executeJobHandler(jobType_t jobType, char *params);
 
 char *executeSerialJobHandler(jobType_t jobType, char *params, char *additionalParams);
+
+void cleanupWorker(void);
 #endif //EXECUTEJOBHANDLER_H

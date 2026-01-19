@@ -152,6 +152,15 @@ static job_t readResponseFromJob(MPI_Status *status) {
 
     MPI_Recv(response, responseSize, MPI_CHAR, status->MPI_SOURCE, status->MPI_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
+    if(status->MPI_TAG == ERROR_JOB) {
+        printf("Worker %d reported an error while processing job[Type = %s; jobId = %llu ; chunkId = %llu]. Terminating dispatcher.\n", status->MPI_SOURCE, getJobType(finishedJob), finishedJob->jobId, finishedJob->chunkId);
+        fflush(stdout);
+        sprintf(log, "Worker %d reported an error while processing job[Type = %s; jobId = %llu ; chunkId = %llu]. Terminating dispatcher.\n", status->MPI_SOURCE, getJobType(finishedJob), finishedJob->jobId, finishedJob->chunkId);
+        logData(log);
+        free(response);
+        return NULL;
+    }
+
     if(responseSize > 4096) {
         char *responseLogBuffer = malloc((responseSize * sizeof(char) * 3) / 2);
         sprintf(responseLogBuffer, "Received response for job[Type = %s; jobId = %llu ; chunkId = %llu] from worker %d\nResponse from job : %s\n", getJobType(finishedJob), finishedJob->jobId, finishedJob->chunkId, status->MPI_SOURCE, response);
@@ -188,7 +197,8 @@ DWORD WINAPI getResponses(LPVOID lpParam) {
 
         job_t response = readResponseFromJob(&status);
 
-        handleResponse(response, status.MPI_SOURCE);
+        if(response)
+            handleResponse(response, status.MPI_SOURCE);
     }
 
     sprintf(log, "Finished reading responses from jobs");
