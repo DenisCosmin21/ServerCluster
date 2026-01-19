@@ -4,6 +4,7 @@
 
 #include "Utilities.h"
 
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -14,7 +15,11 @@ void *allocate(void *buffer, size_t elem_size, size_t *old_size) {
 
     if(new_buffer == NULL) {
         perror("Not enough memory");
-        exit(-1);
+#if MODE == PARALLEL
+        MPI_Abort(MPI_COMM_WORLD, 1);
+#else
+        exit(1);
+#endif
     }
 
     buffer = new_buffer;

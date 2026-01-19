@@ -14,7 +14,7 @@ char *computePrimeDivizorsCount(size_t n) {
 
     if(buffer == NULL) {
         perror("Eroare alocare");
-        exit(-1);
+        exit(1);
     }
 
     size_t result = 0;

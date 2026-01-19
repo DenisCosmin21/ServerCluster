@@ -145,7 +145,7 @@ static job_t readResponseFromJob(MPI_Status *status) {
 
     if(response == NULL) {
         perror("Eroare alocare");
-        exit(-1);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     job_t finishedJob = assignedJobs[status->MPI_SOURCE - 1];
@@ -303,7 +303,7 @@ DWORD WINAPI saveResponses(LPVOID lpParam) {
 
             if(responseFile == NULL) {
                 perror("Error opening response file\n");
-                exit(-1);
+                MPI_Abort(MPI_COMM_WORLD, 1);
             }
 
             fprintf(responseFile, "%s\n", response->params);

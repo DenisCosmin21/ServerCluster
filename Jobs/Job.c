@@ -7,14 +7,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../Config/config.h"
 
 job_t newJob(jobType_t jobType, char *params, char *additionalParam, uint64_t jobId, uint64_t chunkId) {
     job_t newJob = malloc(sizeof(struct job));
 
     if(newJob == NULL) {
         perror("eroare de alocare");
-        //MPI_Abort(MPI_COMM_WORLD, 1);
-        exit(-1);
+#if MODE == PARALLEL
+        MPI_Abort(MPI_COMM_WORLD, 1);
+#else
+        exit(1);
+#endif
     }
 
     newJob->jobType = jobType;

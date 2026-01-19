@@ -3,6 +3,9 @@
 //
 
 #include "MatrixHandler.h"
+
+#include <mpi.h>
+
 #include "../Handler/ReadJobHandler.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,7 +43,7 @@ void matrixMultHandler(job_t job) {
 
     if (file2 == NULL) {
         perror("File not found");
-        exit(-1);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     size_t matrixSize = getMatrixSize(file2);
@@ -65,7 +68,7 @@ void matrixMultHandler(job_t job) {
 
         if (firstMatrix == NULL) {
             perror("malloc");
-            exit(-1);
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
 
         readMatrixChunk(file1, firstMatrix, matrixSize, matrixSize);
@@ -96,7 +99,7 @@ void matrixMultHandler(job_t job) {
 
                 if(firstMatrix == NULL) {
                     perror("malloc");
-                    exit(-1);
+                    MPI_Abort(MPI_COMM_WORLD, 1);
                 }
 
                 readMatrixChunk(file1, firstMatrix, lastChunk, matrixSize); //If we are on the last job created we should span it on all the lines
@@ -114,7 +117,7 @@ void matrixMultHandler(job_t job) {
 
                 if(firstMatrix == NULL) {
                     perror("malloc");
-                    exit(-1);
+                    MPI_Abort(MPI_COMM_WORLD, 1);
                 }
 
                 readMatrixChunk(file1, firstMatrix, chunkSize, matrixSize);
@@ -132,7 +135,7 @@ void matrixMultHandler(job_t job) {
 
     if (firstMatrix == NULL) {
         perror("malloc");
-        exit(-1);
+        exit(1);
     }
 
     readMatrixChunk(file1, firstMatrix, matrixSize, matrixSize);
@@ -163,14 +166,14 @@ void matrixAddHandler(job_t job) {
 
     if (file1 == NULL) {
         perror("File not found");
-        exit(-1);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     FILE *file2 = fopen(fileName2, "r");
 
     if (file2 == NULL) {
         perror("File not found");
-        exit(-1);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     matrixSize = getMatrixSize(file1);
@@ -183,7 +186,7 @@ void matrixAddHandler(job_t job) {
 
         if (firstMatrix == NULL) {
             perror("malloc");
-            exit(-1);
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
 
         readMatrixChunk(file1, firstMatrix, matrixSize, matrixSize);
@@ -192,7 +195,7 @@ void matrixAddHandler(job_t job) {
 
         if (secondMatrix == NULL) {
             perror("malloc");
-            exit(-1);
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
 
         readMatrixChunk(file2, secondMatrix, matrixSize, matrixSize);
@@ -228,14 +231,14 @@ void matrixAddHandler(job_t job) {
 
             if(firstMatrix == NULL) {
                 perror("malloc");
-                exit(-1);
+                MPI_Abort(MPI_COMM_WORLD, 1);
             }
 
             secondMatrix = malloc(chunkSize * sizeof(char) * 9 * matrixSize);
 
             if(secondMatrix == NULL) {
                 perror("malloc");
-                exit(-1);
+                MPI_Abort(MPI_COMM_WORLD, 1);
             }
             readMatrixChunk(file1, firstMatrix, lastChunk, matrixSize);
             readMatrixChunk(file2, secondMatrix, lastChunk, matrixSize);
@@ -245,14 +248,14 @@ void matrixAddHandler(job_t job) {
 
             if(firstMatrix == NULL) {
                 perror("malloc");
-                exit(-1);
+                MPI_Abort(MPI_COMM_WORLD, 1);
             }
 
             secondMatrix = malloc(lastChunk * sizeof(char) * 9 * matrixSize);
 
             if(secondMatrix == NULL) {
                 perror("malloc");
-                exit(-1);
+                MPI_Abort(MPI_COMM_WORLD, 1);
             }
             readMatrixChunk(file1, firstMatrix, chunkSize, matrixSize);
             readMatrixChunk(file2, secondMatrix, chunkSize, matrixSize);
@@ -274,7 +277,7 @@ void matrixAddHandler(job_t job) {
 
     if (firstMatrix == NULL) {
         perror("malloc");
-        exit(-1);
+        exit(1);
     }
 
     readMatrixChunk(file1, firstMatrix, matrixSize, matrixSize);
@@ -283,7 +286,7 @@ void matrixAddHandler(job_t job) {
 
     if (secondMatrix == NULL) {
         perror("malloc");
-        exit(-1);
+        exit(1);
     }
 
     readMatrixChunk(file2, secondMatrix, matrixSize, matrixSize);

@@ -49,7 +49,7 @@ char *computePrimes(size_t n) {
 
     if(buffer == NULL) {
         perror("Eroare alocare");
-        exit(-1);
+        exit(1);
     }
 
     if (primes != NULL && (ssize_t)n < maxN) {
@@ -63,7 +63,7 @@ char *computePrimes(size_t n) {
     prime_t *newPrimes = realloc(primes, maxN * sizeof(prime_t));
     if (newPrimes == NULL) {
         perror("Eroare alocare realloc");
-        exit(-1);
+        exit(1);
     }
     primes = newPrimes;
 

@@ -21,7 +21,7 @@ int main(void) {
     MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &provided);
 
     if (provided < MPI_THREAD_MULTIPLE) {
-        exit(-1);
+        exit(1);
     }
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

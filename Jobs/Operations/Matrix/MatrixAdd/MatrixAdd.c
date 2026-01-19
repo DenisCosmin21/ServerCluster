@@ -15,7 +15,7 @@ char *computeMatrixAdd(char *matrix1, char *matrix2) {
 
     if (outputBuffer == NULL) {
         perror("malloc");
-        exit(-1);
+        exit(1);
     }
 
     long elem1 = 0, elem2 = 0, result = 0;

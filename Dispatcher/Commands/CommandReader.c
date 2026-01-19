@@ -3,6 +3,9 @@
 //
 
 #include "CommandReader.h"
+
+#include <mpi.h>
+
 #include "../../Jobs/Operations/Handler/ReadJobHandler.h"
 #include "../../Globals/globals.h"
 #include "../../Jobs/Job.h"
@@ -29,7 +32,7 @@ DWORD WINAPI readCommands(LPVOID lpParam) {
 
     if (commandFile == NULL) {
         perror("Error opening command file\n");
-        exit(-1);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     job_t job = NULL;

@@ -4,11 +4,12 @@
 
 #include "JobReader.h"
 
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../Utilities/Utilities.h"
 #include "Job.h"
-
+#include "../Config/config.h"
 static uint64_t currentJobId = 0;
 
 job_t readCommand(FILE* file) {
@@ -23,7 +24,11 @@ job_t readCommand(FILE* file) {
 
     if(command == NULL) {
         perror("Eroare alocare");
-        exit(-1);
+#if MODE == PARALLEL
+        MPI_Abort(MPI_COMM_WORLD, 1);
+#else
+        exit(1);
+#endif
     }
 
     command[current_length++] = fgetc(file);

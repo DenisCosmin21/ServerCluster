@@ -3,6 +3,9 @@
 //
 
 #include "Logger.h"
+
+#include <mpi.h>
+
 #include "../Config/config.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +20,7 @@ void initLogger(void) {
 
     if(logFile == NULL) {
         perror("Eroare deschidre loger");
-        exit(-1);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
 #if MODE == PARALLEL

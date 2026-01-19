@@ -28,7 +28,7 @@ static void initAvailableWorkers(void) {
 
     if(workers == NULL) {
         perror("Eroare alocare");
-        exit(-1);
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
     for(int i = 0; i < totalWorkers - 1; i++) {
@@ -108,14 +108,14 @@ void initializeDispatcher(HANDLE *threads) {
     for(int i = 0; i < 4; i++) {
         if (threads[i] == NULL) {
             fprintf(stderr, "Error creating thread %d\n", i);
-            exit(-1);
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
     }
     #else
     initAnagrams();
     if(threads[0] == NULL) {
         fprintf(stderr, "Error creating thread\n");
-        exit(-1);
+        exit(1);
     }
 #endif
 }

@@ -29,7 +29,7 @@ void executeJob(job_t job) {
 
     if(responseFile == NULL) {
         perror("Error opening response file\n");
-        exit(-1);
+        exit(1);
     }
 
     fprintf(responseFile, "%s\n", response);

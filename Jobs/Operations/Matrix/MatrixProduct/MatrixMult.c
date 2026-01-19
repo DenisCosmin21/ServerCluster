@@ -63,7 +63,7 @@ static size_t computeMatrixProductAsLong(long** resultMatrix, char* matrix1, cha
 
             if(resultMatrix[posMatrix1] == NULL) {
                 perror("Error allocating resultMatrix");
-                exit(-1);
+                exit(1);
             }
 
             memset(resultMatrix[posMatrix1], 0, matrixSize * sizeof(long));
@@ -103,7 +103,7 @@ char *computeMatrixMult(char *matrix1, char *matrix2) {
 
     if(resultMatrix == NULL) {
         perror("Failed to allocate memory for resultMatrix");
-        exit(-1);
+        exit(1);
     }
 
     size_t columnSize = computeMatrixProductAsLong(resultMatrix, matrix1, matrix2, matrixSize);
